@@ -22,7 +22,7 @@ ICaptchaSolver rucaptchaSolver = rucaptchaType.GetCaptchaSolverByType("ваш а
 CaptchaSolverType anticapthcaSolver = CaptchaSolverType.AntiCaptcha;
 ICaptchaSolver anticapthcaSolver = anticapthcaSolver.GetCaptchaSolverByType("ваш апи ключ на сервисе");
 ```
-Второй способ удобно использовать при работе с визуальным интерфейсом (в WPF/WinForms элемент ComboBox);
+Второй способ удобно использовать при работе с визуальным интерфейсом (в WPF/WinForms элемент ComboBox)
 
 Теперь непосредственно решим капчу:
 ```
