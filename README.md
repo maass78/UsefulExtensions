@@ -29,4 +29,4 @@ ICaptchaSolver anticapthcaSolver = anticapthcaSolver.GetCaptchaSolverByType("в�
 ICaptchaSolver rucaptchaSolver = new RucapthcaSolver("ваш апи ключ на сервисе"); 
 string gRecaptchaResponse = rucaptchaSolver.SolveRecaptchaV2("6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-", "https://www.google.com/recaptcha/api2/demo", false);
 ```
-Подробное описание по параметрам методов можно посмотреть в подсказках к ним. Также это хорошо описано в [документации к api рукапчи](https://rucaptcha.com/api-rucaptcha);
+Подробное описание по параметрам методов можно посмотреть в подсказках к ним. Также это хорошо описано в [документации к api рукапчи](https://rucaptcha.com/api-rucaptcha)
