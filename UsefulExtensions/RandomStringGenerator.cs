@@ -3,6 +3,9 @@ using System.Text;
 
 namespace UsefulExtensions
 {
+    /// <summary>
+    /// Генератор случайных строк
+    /// </summary>
     public class RandomStringGenerator
     {
         /// <summary>
@@ -15,6 +18,9 @@ namespace UsefulExtensions
         /// </summary>
         public static RandomStringGenerator AllSymbolsGenerator => new RandomStringGenerator("QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm0987654321");
 
+        /// <summary>
+        /// Словарь символов, из которых генерируется случайная строка
+        /// </summary>
         public string Dictionary { get; set; }
         private Random _random;
 
@@ -24,6 +30,11 @@ namespace UsefulExtensions
             Dictionary = dictionary;
         }
 
+        /// <summary>
+        /// Генерирует случайную строку с указанной длиной
+        /// </summary>
+        /// <param name="keyLenght"></param>
+        /// <returns>Случайная строка с указанной длиной, состоящая из символов словаря</returns>
         public string Generate(int keyLenght)
         {
             StringBuilder sb = new StringBuilder(keyLenght - 1);

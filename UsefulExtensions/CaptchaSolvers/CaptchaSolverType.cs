@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using UsefulExtensions.CaptchaSolvers.Implementations;
+﻿using UsefulExtensions.CaptchaSolvers.Implementations;
 
 namespace UsefulExtensions.CaptchaSolvers
 {

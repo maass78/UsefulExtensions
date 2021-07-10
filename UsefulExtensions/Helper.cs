@@ -46,10 +46,17 @@ namespace UsefulExtensions
         public bool Checked { get; set; }
 
         /// <summary>
-        /// Возвращает строковое представление аккаунта в формате login:password
+        /// Возвращает строковое представление аккаунта в формате <c>login:password</c>
         /// </summary>
-        /// <returns>Cтроковое представление аккаунта в формате login:password</returns>
-        public override string ToString() => $"{Login}:{Password}";
+        /// <returns>Cтроковое представление аккаунта в формате <c>login:password</c></returns>
+        public override string ToString() => ToString(":");
+
+        /// <summary>
+        /// Возвращает логин и пароль аккаунта, разделенные указанным разделителем
+        /// </summary>
+        /// <param name="separator">Разделитель между логином и паролем</param>
+        /// <returns>Логин и пароль аккаунта, разделенные указанным разделителем</returns>
+        public string ToString(string separator) => $"{Login}{separator}{Password}";
     }
 
     /// <summary>
@@ -57,10 +64,6 @@ namespace UsefulExtensions
     /// </summary>
     public static class Helper
     {
-        //public const string RuCaptchaKey = "71c4c23aa69f4ccf131dbf5486961f18";
-        //public const string AntiCaptchaKey = "c60034bb3e49f18aba261067b1f6f697";
-        //public const string SmsHubKey = "58779Udcdca72b9beb17fa831a81bf34f5c36f";
-
         /// <summary>
         /// Возвращает Unix TimeStamp Seconds
         /// </summary>
