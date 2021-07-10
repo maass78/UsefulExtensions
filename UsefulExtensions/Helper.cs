@@ -101,6 +101,7 @@ namespace UsefulExtensions
 
         public static List<Account> ParseAccountsFromString(string value)
         {
+            value = value.Replace("\r", string.Empty);
             string[] lines = value.Split('\n');
             List<Account> output = new List<Account>();
             for (int i = 0; i < lines.Length; i++)
@@ -128,6 +129,7 @@ namespace UsefulExtensions
         public static List<ProxyClient> ParseProxiesFromString(string value, ProxyType proxyType)
         {
             List<ProxyClient> output = new List<ProxyClient>();
+            value = value.Replace("\r", string.Empty);
             string[] lines = value.Split('\n');
             for (int i = 0; i < lines.Length; i++)
             {
