@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>UsefulExtensions</name>
+    </assembly>
+    <members>
+        <member name="T:UsefulExtensions.CaptchaSolvers.CaptchaSolverType">
+            <summary>
+            Тип решателя капчи. Обычно используется для выбора сервиса решения капчи в графическом интерфейсе.
+            </summary>
+        </member>
+        <member name="F:UsefulExtensions.CaptchaSolvers.CaptchaSolverType.Rucaptcha">
+            <summary>
+            https://rucaptcha.com/
+            </summary>
+        </member>
+        <member name="F:UsefulExtensions.CaptchaSolvers.CaptchaSolverType.AntiCaptcha">
+            <summary>
+            https://anti-captcha.com/
+            </summary>
+        </member>
+        <member name="T:UsefulExtensions.CaptchaSolvers.CaptchaSolverTypeExtensions">
+            <summary>
+            Предоставляет методы расширения для перечисления <see cref="T:UsefulExtensions.CaptchaSolvers.CaptchaSolverType"/>
+            </summary>
+        </member>
+        <member name="M:UsefulExtensions.CaptchaSolvers.CaptchaSolverTypeExtensions.GetCaptchaSolverByType(UsefulExtensions.CaptchaSolvers.CaptchaSolverType,System.String)">
+            <summary>
+            Получение <see cref="T:UsefulExtensions.CaptchaSolvers.ICaptchaSolver"/> по типу используемого сервиса
+            </summary>
+            <param name="type">Сервис решения капчи</param>
+            <param name="apiKey">Сервисный ключ (api key) к указанному сервису решения капчи</param>
+            <returns>Одна из стандартных реализаций интерфейса <see cref="T:UsefulExtensions.CaptchaSolvers.ICaptchaSolver"/> в зависимости от указанного типа</returns>
+        </member>
+        <member name="T:UsefulExtensions.CaptchaSolvers.ICaptchaSolver">
+            <summary>
+            Интерфейс взаимодействия с сервисом решения капчи. Стандартные реализации: <see cref="T:UsefulExtensions.CaptchaSolvers.Implementations.RucaptchaSolver"/>, <see cref="T:UsefulExtensions.CaptchaSolvers.Implementations.AnticaptchaSolver"/>
+            </summary>
+        </member>
+        <member name="M:UsefulExtensions.CaptchaSolvers.ICaptchaSolver.SolveRecaptchaV2(System.String,System.String,System.Boolean)">
+            <summary>
+            Решение reCAPTCHA V2, также известной как "Я не робот" reCAPTCHA
+            </summary>
+            <param name="siteKey">Значение параметра k или data-sitekey, которое вы нашли в коде страницы</param>
+            <param name="pageUrl">Полный URL страницы, на которой вы решаете reCAPTCHA V2</param>
+            <param name="invisible">true — говорит нам, что на сайте невидимая reCAPTCHA. false — обычная reCAPTCHA.</param>
+            <returns>Токен g-recaptcha-response</returns>
+            <remarks>
+            Посмотрите исходный код элемента на странице, где вы встретили reCAPTCHA.
+            <para/> Найдите ссылку, которая начинается с www.google.com/recaptcha/api2/anchor или найдите параметр data-sitekey.
+            <para/> В аргументы передавайте значение параметра k из ссылки или значение data-sitekey.
+            </remarks>
+        </member>
+        <member name="M:UsefulExtensions.CaptchaSolvers.ICaptchaSolver.SolveArkoseCaptcha(System.String,System.String,System.String)">
+            <summary>
+            Решение Arkose Labs FunCaptcha с помощью токена
+            </summary>
+            <param name="publicKey">Значение параметра pk или data-pkey которое вы нашли в коде страницы</param>
+            <param name="surl">Значение параметра surl которое вы нашли в коде страницы</param>
+            <param name="pageUrl">Полный URL страницы, на которой вы решаете FunCaptcha</param>
+            <returns>Токен решенной капчи</returns>
+            <remarks>
+            Вам нужно найти публичный ключ FunCaptcha и сервисный URL (surl). 
+            <para/> Публичный ключ можно найти в значении параметра data-pkey у div с FunCaptcha или же найти элемент с именем fc-token, а из его значения вырезать ключ, который указан после pk.
+            <para/> Сервисный URL можно найти в том же элементе с именем fc-token - это значение после surl. Этот параметр не обязателен и если вы его не указали - мы используем значение по умолчанию, которое работает в большинстве случаев. Но все же мы рекомендуем его указывать на случай, если на сайте используется нестандартный вариант.
+            </remarks>
+        </member>
+        <member name="M:UsefulExtensions.CaptchaSolvers.ICaptchaSolver.SolveHCaptcha(System.String,System.String)">
+            <summary>
+            Решение hCaptcha, относительно новый вид капчи, который очень похож на reCAPTCHA
+            </summary>
+            <param name="siteKey">Значение параметра data-sitekey, которое вы нашли в коде страницы</param>
+            <param name="pageUrl">Полный URL страницы, на которой вы решаете hCaptcha</param>
+            <returns>Токен решенной капчи</returns>
+        </member>
+        <member name="P:UsefulExtensions.CaptchaSolvers.ICaptchaSolver.Proxy">
+            <summary>
+            Прокси
+            </summary>
+        </member>
+        <member name="E:UsefulExtensions.CaptchaSolvers.ICaptchaSolver.OnLogMessage">
+            <summary>
+            Вызывается, когда капча отправляется/решается
+            </summary>
+        </member>
+        <member name="P:UsefulExtensions.CaptchaSolvers.ICaptchaSolver.Key">
+            <summary>
+            Api Key (Сервисный ключ)
+            </summary>
+        </member>
+        <member name="T:UsefulExtensions.CaptchaSolvers.Implementations.AnticaptchaSolver">
+            <summary>
+            Реализация интерфейса <see cref="T:UsefulExtensions.CaptchaSolvers.ICaptchaSolver"/> для сервиса AntiCaptcha (https://anti-captcha.com/)
+            </summary>
+        </member>
+        <member name="T:UsefulExtensions.CaptchaSolvers.Implementations.RucaptchaSolver">
+            <summary>
+            Реализация интерфейса <see cref="T:UsefulExtensions.CaptchaSolvers.ICaptchaSolver"/> для сервиса RuCaptcha (https://rucaptcha.com/)
+            </summary>
+        </member>
+        <member name="M:UsefulExtensions.Account.GenerateRandomAccount(System.Int32,System.Int32)">
+            <summary>
+            Возвращает аккаунт с рандомно сгенерированными логином и паролем.
+            </summary>
+            <param name="usernameLength">Длина рандомно сгенерированного логина</param>
+            <param name="passwordLength">Длина рандомно сгенерированного пароля</param>
+            <returns>Аккаунт с рандомно сгенерированными логином и паролем</returns>
+            <remarks>
+            Для генерации используется <see cref="P:UsefulExtensions.RandomStringGenerator.AllSymbolsGenerator"/>
+            </remarks>
+        </member>
+        <member name="M:UsefulExtensions.Account.#ctor(System.String,System.String)">
+            <summary>
+            Конструктор класса <see cref="T:UsefulExtensions.Account"/>
+            </summary>
+            <param name="login">Логин аккаунта</param>
+            <param name="password">Пароль аккаунта</param>
+        </member>
+        <member name="P:UsefulExtensions.Account.Checked">
+            <summary>
+            Проверен ли аккаунт. Обычно используется для чекеров.
+            </summary>
+        </member>
+        <member name="M:UsefulExtensions.Account.ToString">
+            <summary>
+            Возвращает строковое представление аккаунта в формате login:password
+            </summary>
+            <returns>Cтроковое представление аккаунта в формате login:password</returns>
+        </member>
+        <member name="T:UsefulExtensions.Helper">
+            <summary>
+            Статический класс, содержащий методы, часто используемые в создании софта (чекеры, регеры и пр. софт для автоматизации действий на сайтах)
+            </summary>
+        </member>
+        <member name="M:UsefulExtensions.Helper.GetUnixSeconds">
+            <summary>
+            Возвращает Unix TimeStamp Seconds
+            </summary>
+            <returns>Количество секунд, прошедших с 1 января 1970 г. Часовой пояс UTC</returns>
+        </member>
+        <member name="M:UsefulExtensions.Helper.GetUnixMilliseconds">
+            <summary>
+            Возвращает Unix TimeStamp Milliseconds
+            </summary>
+            <returns>Количество миллисекунд, прошедших с 1 января 1970 г. Часовой пояс UTC</returns>
+        </member>
+        <member name="M:UsefulExtensions.Helper.GetMD5Hash(System.String)">
+            <summary>
+            Возращает MD5 хэш строки
+            </summary>
+            <param name="value">Исходная строка, хэш которой необходимо получить</param>
+            <returns>MD5 хэш исходной строки</returns>
+        </member>
+        <member name="M:UsefulExtensions.Helper.GetMD5Hash(System.Byte[])">
+            <summary>
+            Возращает MD5 хэш массива байтов
+            </summary>
+            <param name="value">Массив байтов, хэш которого необходимо получить</param>
+            <returns>MD5 хэш исходного массива байтов</returns>
+        </member>
+        <member name="P:UsefulExtensions.RandomStringGenerator.NumbersGenerator">
+            <summary>
+            Возвращает экземпляр класса <see cref="T:UsefulExtensions.RandomStringGenerator"/>, генерирующий строку только из цифр 0987654321
+            </summary>
+        </member>
+        <member name="P:UsefulExtensions.RandomStringGenerator.AllSymbolsGenerator">
+            <summary>
+            Возвращает экземпляр класса <see cref="T:UsefulExtensions.RandomStringGenerator"/>, генерирующий строку только из латинских букв с разным регистром и цифр 
+            </summary>
+        </member>
+    </members>
+</doc>
