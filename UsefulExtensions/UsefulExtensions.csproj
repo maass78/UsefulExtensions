@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>C:\Users\admin\source\repos\UsefulExtensions\UsefulExtensions\UsefulExtensions.xml</DocumentationFile>
+    <DocumentationFile>C:\Users\server\source\git\UsefulExtensions\UsefulExtensions\bin\Release\netstandard2.0\UsefulExtensions.xml</DocumentationFile>
+    <OutputPath></OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
