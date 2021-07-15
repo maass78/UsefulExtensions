@@ -150,5 +150,17 @@ namespace UsefulExtensions
             return ParseProxiesFromString(request.Get(url).ToString(), proxyType); 
         }
         public static async Task<List<ProxyClient>> ParseProxiesFromUrlAsync(string url, ProxyType proxyType) => await Task.Run(() => ParseProxiesFromUrl(url, proxyType));
+
+        /// <summary>
+        /// Преобразует строку в массив байт, используя <see cref="Encoding.UTF8"/>
+        /// </summary>
+        /// <param name="value">Строка, которую необходимо преобразовать в массив байтов</param>
+        public static byte[] GetBytes(this string value) => Encoding.UTF8.GetBytes(value);
+
+        /// <summary>
+        /// Преобразует массив байт в строку, используя <see cref="Encoding.UTF8"/>
+        /// </summary>
+        /// <param name="value">Массив байт, который необходимо преобразовать в строку</param>
+        public static string GetString(this byte[] value) => Encoding.UTF8.GetString(value);
     }
 }

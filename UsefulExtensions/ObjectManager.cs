@@ -26,6 +26,7 @@ namespace UsefulExtensions
         /// <param name="objects">Список объектов для перечисления</param>
         public ObjectManager(List<T> objects)
         {
+            AutoReset = false;
             Objects = objects;
             _curIndex = 0;
         }
@@ -40,11 +41,27 @@ namespace UsefulExtensions
             {
                 if (_curIndex >= Objects.Count)
                 {
-                    return default;
+                    if (AutoReset)
+                        _curIndex = 0;
+                    else
+                        return default;
                 }
 
                 return Objects[_curIndex++];
             }
         }
+
+        /// <summary>
+        /// Начинает перечисление с нулевого элемента
+        /// </summary>
+        public void Reset()
+        {
+            _curIndex = 0;
+        }
+
+        /// <summary>
+        /// Возвращает или задаёт значение, будет ли перечисление начинаться заново после достижения конца списка. По умолчанию - <see langword="false"/>
+        /// </summary>
+        public bool AutoReset { get; set; }
     }
 }
