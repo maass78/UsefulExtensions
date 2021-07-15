@@ -18,7 +18,10 @@ namespace UsefulExtensions
         /// </summary>
         public List<T> Objects { get; }
 
-        private int _curIndex; //текущий индекс объекта в списке 
+        /// <summary>
+        /// Текущий индекс объекта в списке 
+        /// </summary>
+        public int CurIndex;
 
         /// <summary>
         /// Конструктор класса <see cref="ObjectManager{T}"/>
@@ -28,7 +31,7 @@ namespace UsefulExtensions
         {
             AutoReset = false;
             Objects = objects;
-            _curIndex = 0;
+            CurIndex = 0;
         }
 
         /// <summary>
@@ -39,15 +42,15 @@ namespace UsefulExtensions
         {
             lock (Sync)
             {
-                if (_curIndex >= Objects.Count)
+                if (CurIndex >= Objects.Count)
                 {
                     if (AutoReset)
-                        _curIndex = 0;
+                        CurIndex = 0;
                     else
                         return default;
                 }
 
-                return Objects[_curIndex++];
+                return Objects[CurIndex++];
             }
         }
 
@@ -56,7 +59,7 @@ namespace UsefulExtensions
         /// </summary>
         public void Reset()
         {
-            _curIndex = 0;
+            CurIndex = 0;
         }
 
         /// <summary>
