@@ -36,7 +36,7 @@ namespace UsefulExtensions.SmsActivators
         /// <param name="type">Сервис смс активации</param>
         /// <param name="apiKey">Сервисный ключ (api key) к указанному сервису смс активации</param>
         /// <returns>Одна из стандартных реализаций интерфейса <see cref="ISmsActivator"/> в зависимости от указанного типа</returns>
-        public static ISmsActivator GetCaptchaSolverByType(this SmsActivatorType type, string apiKey)
+        public static ISmsActivator GetSmsActivatorByType(this SmsActivatorType type, string apiKey)
         {
             if (type == SmsActivatorType.SmsHub)
                 return new SmsHubActivator(apiKey);
