@@ -9,17 +9,31 @@ using UsefulExtensions.SmsActivators.Types;
 
 namespace UsefulExtensions.SmsActivators
 {
-    public abstract class SmsActivatorApiBase : ISmsActivator
+	/// <summary>
+	/// Базовый класс для реализаций совместимых с sms-activate.ru API
+	/// </summary>
+	public abstract class SmsActivatorApiBase : ISmsActivator
 	{
+		/// <summary>
+		/// Сервисный ключ (apiKey) от сервиса смс активации
+		/// </summary>
 		public string ApiKey { get; protected set; }
 		protected abstract string ApiUrl { get; }
 		protected virtual string[] SuccessResponses => new string[2] { "ACCESS", "STATUS" };
 
+		/// <summary>
+		/// Констуктор по умолчанию
+		/// </summary>
+		/// <param name="apiKey">Сервисный ключ (apiKey) от сервиса смс активации</param>
 		public SmsActivatorApiBase(string apiKey)
 		{
 			ApiKey = apiKey;
 		}
 
+		/// <summary>
+		/// Возвращает баланс на сервисе смс активации
+		/// </summary>
+		/// <returns>Баланс на сервисе смс активации</returns>
 		public virtual decimal GetBalance()
         {
 			HttpRequest request = new HttpRequest();
@@ -35,8 +49,19 @@ namespace UsefulExtensions.SmsActivators
 
 			return decimal.Parse(response.Split(':')[1], CultureInfo.InvariantCulture);
         }
+		/// <summary>
+		/// Возвращает баланс на сервисе смс активации
+		/// </summary>
+		/// <returns>Баланс на сервисе смс активации</returns>
 		public virtual async Task<decimal> GetBalanceAsync() => await Task.Run(() => GetBalance());
 
+		/// <summary>
+		/// Бронирует номер
+		/// </summary>
+		/// <param name="service">Сервис, для которого нужно взять номер</param>
+		/// <param name="country">Страна (необязательно)</param>
+		/// <param name="operator">Оператор (необязательно)</param>
+		/// <returns>Класс <see cref="Number"/>, содержащий Id номера и сам номер телефона</returns>
 		public virtual Number GetNumber(string service, string country = null, string @operator = null)
         {
 			HttpRequest request = new HttpRequest();
@@ -59,8 +84,20 @@ namespace UsefulExtensions.SmsActivators
 			string[] data = response.Split(':');
 			return new Number(int.Parse(data[1]), data[2]);
 		}
+		/// <summary>
+		/// Бронирует номер
+		/// </summary>
+		/// <param name="service">Сервис, для которого нужно взять номер</param>
+		/// <param name="country">Страна (необязательно)</param>
+		/// <param name="operator">Оператор (необязательно)</param>
+		/// <returns>Класс <see cref="Number"/>, содержащий Id номера и сам номер телефона</returns>
 		public virtual async Task<Number> GetNumberAsync(string service, string country = null, string @operator = null) => await Task.Run(() => GetNumber(service, country, @operator));
 
+		/// <summary>
+		/// Получает статус номера
+		/// </summary>
+		/// <param name="id">Id номера, содержится в экземпляре класса <see cref="Number"/></param>
+		/// <returns>Статус номера</returns>
 		public virtual Status GetStatus(int id)
         {
 			HttpRequest request = new HttpRequest();
@@ -93,8 +130,19 @@ namespace UsefulExtensions.SmsActivators
 
 			return new Status(statusEnum, null);
 		}
+		/// <summary>
+		/// Получает статус номера
+		/// </summary>
+		/// <param name="id">Id номера, содержится в экземпляре класса <see cref="Number"/></param>
+		/// <returns>Статус номера</returns>
 		public virtual async Task<Status> GetStatusAsync(int id) => await Task.Run(() => GetStatus(id));
 
+		/// <summary>
+		/// Устанавливает статус номера
+		/// </summary>
+		/// <param name="id">Id номера, содержится в экземпляре класса <see cref="Number"/></param>
+		/// <param name="status">Статус, который необходимо установить</param>
+		/// <returns>Результат установки статуса</returns>
 		public virtual SetStatusResult SetStatus(int id, SetStatusEnum status)
         {
 			HttpRequest request = new HttpRequest();
@@ -130,6 +178,12 @@ namespace UsefulExtensions.SmsActivators
 			}
 			return result;
 		}
+		/// <summary>
+		/// Устанавливает статус номера
+		/// </summary>
+		/// <param name="id">Id номера, содержится в экземпляре класса <see cref="Number"/></param>
+		/// <param name="status">Статус, который необходимо установить</param>
+		/// <returns>Результат установки статуса</returns>
 		public virtual async Task<SetStatusResult> SetStatusAsync(int id, SetStatusEnum status) => await Task.Run(() => SetStatus(id, status));
 
 		private bool CheckForExceptions(string response, out Exception ex)
