@@ -37,7 +37,14 @@ namespace UsefulExtensions
             Password = password;
         }
 
+        /// <summary>
+        /// Логин
+        /// </summary>
         public string Login { get; set; }
+
+        /// <summary>
+        /// Пароль
+        /// </summary>
         public string Password { get; set; }
 
         /// <summary>
@@ -162,5 +169,42 @@ namespace UsefulExtensions
         /// </summary>
         /// <param name="value">Массив байт, который необходимо преобразовать в строку</param>
         public static string GetString(this byte[] value) => Encoding.UTF8.GetString(value);
+
+        /// <summary>
+        /// Копирует существующую папку в новую папку включая подкаталоги, если это указано
+        /// </summary>
+        /// <param name="sourceDirName">Копируемая папка</param>
+        /// <param name="destDirName">Имя целевой папки. Если такой папки не существует, она будет создана</param>
+        /// <param name="copySubDirs"><see langword="true"/>, чтобы скопировать папку вместе с подкаталогами и файлами в них</param>
+        /// <param name="overwrite"><see langword="true"/>, чтобы разрешить перезапись файлов</param>
+        public static void CopyDirectory(string sourceDirName, string destDirName, bool copySubDirs, bool overwrite = true)
+        {
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+            DirectoryInfo[] dirs = dir.GetDirectories();
+            Directory.CreateDirectory(destDirName);
+
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string tempPath = Path.Combine(destDirName, file.Name);
+                file.CopyTo(tempPath, overwrite);
+            }
+
+            if (copySubDirs)
+            {
+                foreach (DirectoryInfo subdir in dirs)
+                {
+                    string tempPath = Path.Combine(destDirName, subdir.Name);
+                    CopyDirectory(subdir.FullName, tempPath, copySubDirs);
+                }
+            }
+        }
     }
 }
