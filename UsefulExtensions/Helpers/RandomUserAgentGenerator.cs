@@ -1,32 +1,14 @@
 ﻿using System;
-using System.Security.Cryptography;
 
 namespace UsefulExtensions
 {
-    /// <summary>
-    /// Класс-обёртка для потокобезопасной генерации псевдослучайных чисел.
-    /// Lazy-load singleton для ThreadStatic <see cref="Random"/>.
-    /// </summary>
-    static class Randomizer
-    {
-        private static readonly RNGCryptoServiceProvider Generator = new RNGCryptoServiceProvider();
-
-        private static Random Generate()
-        {
-            var buffer = new byte[4];
-            Generator.GetBytes(buffer);
-            return new Random(BitConverter.ToInt32(buffer, 0));
-        }
-
-        public static Random Instance => _rand ?? (_rand = Generate());
-        [ThreadStatic] private static Random _rand;
-    }
-
     /// <summary>
     /// Генератор случайных User-Agent'ов
     /// </summary>
     public class RandomUserAgentGenerator
     {
+        private static readonly Random _random = new Random();
+
         /// <summary>
         /// Генерирует случайную версию Windows
         /// </summary>
@@ -34,7 +16,7 @@ namespace UsefulExtensions
         private static string GenerateRandomWindowsVersion()
         {
             string windowsVersion = "Windows NT ";
-            int random = Randomizer.Instance.Next(99) + 1;
+            int random = _random.Next(99) + 1;
 
             // Windows 10 = 45% popularity
             if (random >= 1 && random <= 45)
@@ -53,8 +35,8 @@ namespace UsefulExtensions
                 windowsVersion += "6.2";
 
             // Append WOW64 for X64 system
-            if (Randomizer.Instance.NextDouble() <= 0.65)
-                windowsVersion += Randomizer.Instance.NextDouble() <= 0.5 ? "; WOW64" : "; Win64; x64";
+            if (_random.NextDouble() <= 0.65)
+                windowsVersion += _random.NextDouble() <= 0.5 ? "; WOW64" : "; Win64; x64";
 
             return windowsVersion;
         }
@@ -70,7 +52,7 @@ namespace UsefulExtensions
 
             #region Генерация случайной версии
 
-            switch (Randomizer.Instance.Next(4))
+            switch (_random.Next(4))
             {
                 case 0:
                     version = "12.16";
@@ -104,9 +86,9 @@ namespace UsefulExtensions
         /// <returns>Случайный User-Agent от браузера Chrome.</returns>
         public static string GenerateChromeUserAgent()
         {
-            int major = Randomizer.Instance.Next(62, 70);
-            int build = Randomizer.Instance.Next(2100, 3538);
-            int branchBuild = Randomizer.Instance.Next(170);
+            int major = _random.Next(62, 70);
+            int build = _random.Next(2100, 3538);
+            int branchBuild = _random.Next(170);
 
             return $"Mozilla/5.0 ({GenerateRandomWindowsVersion()}) AppleWebKit/537.36 (KHTML, like Gecko) " +
                 $"Chrome/{major}.0.{build}.{branchBuild} Safari/537.36";
@@ -120,7 +102,7 @@ namespace UsefulExtensions
         /// <returns>Случайный User-Agent от браузера Firefox.</returns>
         public static string GenerateFirefoxUserAgent()
         {
-            byte version = FirefoxVersions[Randomizer.Instance.Next(FirefoxVersions.Length - 1)];
+            byte version = FirefoxVersions[_random.Next(FirefoxVersions.Length - 1)];
 
             return $"Mozilla/5.0 ({GenerateRandomWindowsVersion()}; rv:{version}.0) Gecko/20100101 Firefox/{version}.0";
         }
@@ -131,7 +113,7 @@ namespace UsefulExtensions
         /// <returns>Строка-значение заголовка User-Agent</returns>
         public static string GenerateRandomUserAgent()
         {
-            int rand = Randomizer.Instance.Next(99) + 1;
+            int rand = _random.Next(99) + 1;
 
             // TODO: edge, yandex browser, safari
 
