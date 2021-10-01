@@ -14,7 +14,11 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <summary>
         /// https://anti-captcha.com/
         /// </summary>
-        AntiCaptcha
+        AntiCaptcha,
+        /// <summary>
+        /// https://capmonster.cloud/ru/
+        /// </summary>
+        CapMonsterCloud
     }
 
     /// <summary>
@@ -30,9 +34,19 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <returns>Одна из стандартных реализаций интерфейса <see cref="ICaptchaSolver"/> в зависимости от указанного типа</returns>
         public static ICaptchaSolver GetCaptchaSolverByType(this CaptchaSolverType type, string apiKey)
         {
-            if (type == CaptchaSolverType.Rucaptcha)
-                return new RucaptchaSolver(apiKey);
-            else return new AnticaptchaSolver(apiKey);
+            switch (type)
+            {
+                case CaptchaSolverType.Rucaptcha:
+                    return new RucaptchaSolver(apiKey);
+
+                case CaptchaSolverType.AntiCaptcha:
+                    return new AnticaptchaSolver(apiKey);
+
+                case CaptchaSolverType.CapMonsterCloud:
+                    return new CapmonsterCloudSolver(apiKey);
+            }
+
+            return null;
         }
     }
 }
