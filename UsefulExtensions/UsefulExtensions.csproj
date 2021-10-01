@@ -7,13 +7,13 @@
     <Authors>maass78</Authors>
     <Description>Библиотека, позволяющая очень просто выполнять действия, часто необходимые в создании чекеров/регеров и прочего софта для автоматизации каких-либо процессов на сайтах.</Description>
     <PackageIcon>UsefulExtensions1024x1024 transparent.png</PackageIcon>
-    <AssemblyVersion>0.1.0.4</AssemblyVersion>
-    <FileVersion>0.1.0.4</FileVersion>
+    <AssemblyVersion>0.1.0.5</AssemblyVersion>
+    <FileVersion>0.1.0.5</FileVersion>
     <PackageId>maass78.UsefulExtensions</PackageId>
     <RepositoryUrl>https://github.com/maass78/UsefulExtensions</RepositoryUrl>
     <PackageProjectUrl>https://github.com/maass78/UsefulExtensions</PackageProjectUrl>
     <NeutralLanguage>ru</NeutralLanguage>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

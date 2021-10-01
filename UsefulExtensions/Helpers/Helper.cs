@@ -129,20 +129,24 @@ namespace UsefulExtensions
 
             for (int i = 0; i < lines.Length; i++)
             {
-                if (string.IsNullOrWhiteSpace(lines[i]))
-                    continue;
+                try
+                {
+                    if (string.IsNullOrWhiteSpace(lines[i]))
+                        continue;
 
-                string[] data = lines[i].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] data = lines[i].Split(new char[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
 
-                var cookie = new Cookie(data[5], data[6], data[2], data[0]);
+                    var cookie = new Cookie(data[5], data[6], data[2], data[0]);
 
-                if (considerExpires)
-                    cookie.Expires = DateTimeOffset.FromUnixTimeSeconds(long.Parse(data[4])).DateTime;
+                    if (considerExpires)
+                        cookie.Expires = DateTimeOffset.FromUnixTimeSeconds(long.Parse(data[4])).DateTime;
 
-                if (considerSecure)
-                    cookie.Secure = bool.Parse(data[3]);
+                    if (considerSecure)
+                        cookie.Secure = bool.Parse(data[3]);
 
-                storage.Add(cookie);
+                    storage.Add(cookie);
+                }
+                catch { }
             }
 
             return storage;
