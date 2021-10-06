@@ -1,5 +1,6 @@
 ﻿using Leaf.xNet;
 using Newtonsoft.Json;
+using System;
 using System.Threading;
 using UsefulExtensions.CaptchaSolvers.Exceptions;
 
@@ -17,6 +18,10 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public ProxyClient Proxy { get; set; }
 
         public string Key { get; }
+
+        private TimeSpan _delay = TimeSpan.FromSeconds(5);
+
+        public TimeSpan SolveDelay { get => _delay; set => _delay = value; }
 
         public CapmonsterCloudSolver(string key)
         {
@@ -54,11 +59,14 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
             while (solveResponse.Status == 0)
             {
-                Thread.Sleep(5000);
+                Thread.Sleep(_delay);
+
                 string solveResponseString = request.Get($"https://api.capmonster.cloud/res.php?key={Key}&action=get&json=1&id={inResponse.Request}").ToString();
                 solveResponse = JsonConvert.DeserializeObject<RucaptchaResponse>(solveResponseString);
+                
                 if (solveResponse.Status == 0 && solveResponse.Request != CAPTCHA_NOT_READY)
                     throw new InvalidRequestException(solveResponse.Request);
+
                 OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha result: {solveResponse.Request}"));
             }
 

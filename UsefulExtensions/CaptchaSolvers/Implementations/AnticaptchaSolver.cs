@@ -2,6 +2,7 @@
 using Leaf.xNet;
 using Newtonsoft.Json;
 using System.Threading;
+using System;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations
 {
@@ -18,6 +19,9 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
         public event OnLogMessageHandler OnLogMessage;
 
+        private TimeSpan _delay = TimeSpan.FromSeconds(5);
+        public TimeSpan SolveDelay { get => _delay; set => _delay = value; }
+
         public AnticaptchaSolver(string key)
         {
             Key = key;
@@ -26,10 +30,10 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public string SolveArkoseCaptcha(string publicKey, string surl, string pageUrl)
         {
             var request = new AnticaptchaСreateTaskRequest() { ClientKey = Key, Task = new ArkoseCaptchaTask() { Type = "FunCaptchaTaskProxyless", WebsitePublicKey = publicKey, WebsiteURL = pageUrl, FuncaptchaApiJSSubdomain = surl } };
-            return GetTaskResult(request).token;
+            return GetTaskResult<ArkoseCaptchaSolution>(request).Token;
         }
 
-        private dynamic GetTaskResult(AnticaptchaСreateTaskRequest taskRequest)
+        private T GetTaskResult<T>(AnticaptchaСreateTaskRequest taskRequest)
         {
             HttpRequest request = new HttpRequest();
             if (Proxy != null)
@@ -43,13 +47,13 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
             OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.TaskId}"));
 
-            var taskResult = new AnticaptchaGetTaskResult();
+            var taskResult = new AnticaptchaGetTaskResult<T>();
             while (taskResult.Status != CAPTCHA_READY)
             {
-                Thread.Sleep(2000);
+                Thread.Sleep(_delay);
                 request.AddHeader("Content-Type", "application/json");
                 string getSolution = JsonConvert.SerializeObject(new AnticaptchaGetTaskRequest() { ClientKey = Key, TaskId = inResponse.TaskId });
-                taskResult = JsonConvert.DeserializeObject<AnticaptchaGetTaskResult>(request.Post("https://api.anti-captcha.com/getTaskResult", new StringContent(getSolution)).ToString());
+                taskResult = JsonConvert.DeserializeObject<AnticaptchaGetTaskResult<T>>(request.Post("https://api.anti-captcha.com/getTaskResult", new StringContent(getSolution)).ToString());
                 OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha status: {taskResult.Status})"));
             }
 
@@ -59,14 +63,77 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public string SolveRecaptchaV2(string siteKey, string pageUrl, bool invisible)
         {
             var request = new AnticaptchaСreateTaskRequest() { ClientKey = Key, Task = new RecaptchaV2Task() { Type = "RecaptchaV2TaskProxyless", WebsiteKey = siteKey, WebsiteURL = pageUrl, IsInvisible = invisible  } };
-            return GetTaskResult(request).gRecaptchaResponse;
+            return GetTaskResult<RecaptchaV2Solution>(request).GRecaptchaResponse;
         }
 
         public string SolveHCaptcha(string siteKey, string pageUrl)
         {
             var request = new AnticaptchaСreateTaskRequest() { ClientKey = Key, Task = new HCaptchaTask() { Type = "HCaptchaTaskProxyless", WebsiteKey = siteKey, WebsiteURL = pageUrl } };
-            return GetTaskResult(request).gRecaptchaResponse;
+            return GetTaskResult<RecaptchaV2Solution>(request).GRecaptchaResponse;
         }
+    }
+
+    class AnticaptchaСreateTaskRequest
+    {
+        [JsonProperty("clientKey")]
+        public string ClientKey { get; set; }
+
+        [JsonProperty("task")]
+        public object Task { get; set; }
+    }
+    class AnticaptchaCreateTaskResult
+    {
+        [JsonProperty("errorId")]
+        public int ErrorId { get; set; }
+
+        [JsonProperty("taskId")]
+        public int TaskId { get; set; }
+    }
+
+    class AnticaptchaGetTaskRequest
+    {
+        [JsonProperty("clientKey")]
+        public string ClientKey { get; set; }
+
+        [JsonProperty("taskId")]
+        public int TaskId { get; set; }
+    }
+    class AnticaptchaGetTaskResult<T>
+    {
+        [JsonProperty("errorId")]
+        public int ErrorId { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("solution")]
+        public T Solution { get; set; }
+
+        [JsonProperty("cost")]
+        public string Cost { get; set; }
+
+        [JsonProperty("ip")]
+        public string Ip { get; set; }
+
+        [JsonProperty("createTime")]
+        public int CreateTime { get; set; }
+
+        [JsonProperty("endTime")]
+        public int EndTime { get; set; }
+
+        [JsonProperty("solveCount")]
+        public string SolveCount { get; set; }
+    }
+
+    class RecaptchaV2Solution
+    {
+        [JsonProperty("gRecaptchaResponse")]
+        public string GRecaptchaResponse { get; set; }
+    }
+    class ArkoseCaptchaSolution
+    {
+        [JsonProperty("token")]
+        public string Token { get; set; }
     }
 
     class RecaptchaV2Task
@@ -111,68 +178,4 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         [JsonProperty("websiteKey")]
         public string WebsiteKey { get; set; }
     }
-
-    class AnticaptchaСreateTaskRequest
-    {
-        [JsonProperty("clientKey")]
-        public string ClientKey { get; set; }
-
-        [JsonProperty("task")]
-        public object Task { get; set; }
-    }
-    class AnticaptchaCreateTaskResult
-    {
-        [JsonProperty("errorId")]
-        public int ErrorId { get; set; }
-
-        [JsonProperty("taskId")]
-        public int TaskId { get; set; }
-    }
-    class AnticaptchaGetTaskRequest
-    {
-        [JsonProperty("clientKey")]
-        public string ClientKey { get; set; }
-
-        [JsonProperty("taskId")]
-        public int TaskId { get; set; }
-    }
-    class AnticaptchaGetTaskResult
-    {
-        [JsonProperty("errorId")]
-        public int ErrorId { get; set; }
-
-        [JsonProperty("status")]
-        public string Status { get; set; }
-
-        [JsonProperty("solution")]
-        public dynamic Solution { get; set; }
-
-        [JsonProperty("cost")]
-        public string Cost { get; set; }
-
-        [JsonProperty("ip")]
-        public string Ip { get; set; }
-
-        [JsonProperty("createTime")]
-        public int CreateTime { get; set; }
-
-        [JsonProperty("endTime")]
-        public int EndTime { get; set; }
-
-        [JsonProperty("solveCount")]
-        public string SolveCount { get; set; }
-    }
-
-    class RecaptchaV2Solution
-    {
-        [JsonProperty("gRecaptchaResponse")]
-        public string gRecaptchaResponse { get; set; }
-    }
-    class ArkoseCaptchaSolution
-    {
-        [JsonProperty("token")]
-        public string token { get; set; }
-    }
-
-
 }

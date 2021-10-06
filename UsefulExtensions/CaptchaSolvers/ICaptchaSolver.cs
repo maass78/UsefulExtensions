@@ -58,6 +58,11 @@ namespace UsefulExtensions.CaptchaSolvers
         /// Api Key (Сервисный ключ)
         /// </summary>
         string Key { get; }
+
+        /// <summary>
+        /// Задержка между проверками на решение (по умолчанию равна 5 сек)
+        /// </summary>
+        TimeSpan SolveDelay { get; set; }
     }
 
     public delegate void OnLogMessageHandler(object sender, OnLogMessageEventArgs eventArgs);

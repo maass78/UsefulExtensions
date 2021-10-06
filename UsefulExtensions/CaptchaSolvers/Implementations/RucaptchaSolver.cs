@@ -2,6 +2,7 @@
 using Leaf.xNet;
 using Newtonsoft.Json;
 using System.Threading;
+using System;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations
 {
@@ -12,11 +13,15 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
     {
         private const string CAPTCHA_NOT_READY = "CAPCHA_NOT_READY";
 
+        private TimeSpan _delay = TimeSpan.FromSeconds(5);
+
         public event OnLogMessageHandler OnLogMessage;
 
+        public string Key { get; }
+        
         public ProxyClient Proxy { get; set; }
 
-        public string Key { get; }
+        public TimeSpan SolveDelay { get => _delay; set => _delay = value; }
 
         public RucaptchaSolver(string key)
         {
@@ -54,11 +59,14 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
             while (solveResponse.Status == 0)
             {
-                Thread.Sleep(5000);
+                Thread.Sleep(_delay);
+
                 string solveResponseString = request.Get($"http://rucaptcha.com/res.php?key={Key}&action=get&json=1&id={inResponse.Request}").ToString();
                 solveResponse = JsonConvert.DeserializeObject<RucaptchaResponse>(solveResponseString);
+
                 if (solveResponse.Status == 0 && solveResponse.Request != CAPTCHA_NOT_READY)
                     throw new InvalidRequestException(solveResponse.Request);
+
                 OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha result: {solveResponse.Request}"));
             }
 
