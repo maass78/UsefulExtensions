@@ -51,7 +51,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             RucaptchaResponse inResponse = JsonConvert.DeserializeObject<RucaptchaResponse>(inResponseString);
 
             if (inResponse.Status != 1)
-                throw new InvalidRequestException(inResponse.Request);
+                throw new InvalidRequestException("Captcha error: " + inResponse.Request);
 
             OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.Request}"));
 
@@ -65,7 +65,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                 solveResponse = JsonConvert.DeserializeObject<RucaptchaResponse>(solveResponseString);
                 
                 if (solveResponse.Status == 0 && solveResponse.Request != CAPTCHA_NOT_READY)
-                    throw new InvalidRequestException(solveResponse.Request);
+                    throw new InvalidRequestException("Captcha error: " + solveResponse.Request);
 
                 OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha result: {solveResponse.Request}"));
             }

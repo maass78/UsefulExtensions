@@ -19,18 +19,21 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
         public string Key { get; }
         
+        public string Url { get; set; }
+
         public ProxyClient Proxy { get; set; }
 
         public TimeSpan SolveDelay { get => _delay; set => _delay = value; }
 
-        public RucaptchaSolver(string key)
+        public RucaptchaSolver(string key, string url = "http://rucaptcha.com")
         {
+            Url = url;
             Key = key;
         }
 
         public string SolveArkoseCaptcha(string publicKey, string surl, string pageUrl)
         {
-            string inUrl = $"http://rucaptcha.com/in.php?" +
+            string inUrl = $"{Url}/in.php?" +
                            $"key={Key}" +
                            $"&method=funcaptcha" +
                            $"&publickey={publicKey}" +
@@ -51,7 +54,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             RucaptchaResponse inResponse = JsonConvert.DeserializeObject<RucaptchaResponse>(inResponseString);
 
             if (inResponse.Status != 1)
-                throw new InvalidRequestException(inResponse.Request);
+                throw new InvalidRequestException("Captcha error: " + inResponse.Request);
 
             OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.Request}"));
 
@@ -61,11 +64,11 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             {
                 Thread.Sleep(_delay);
 
-                string solveResponseString = request.Get($"http://rucaptcha.com/res.php?key={Key}&action=get&json=1&id={inResponse.Request}").ToString();
+                string solveResponseString = request.Get($"{Url}/res.php?key={Key}&action=get&json=1&id={inResponse.Request}").ToString();
                 solveResponse = JsonConvert.DeserializeObject<RucaptchaResponse>(solveResponseString);
 
                 if (solveResponse.Status == 0 && solveResponse.Request != CAPTCHA_NOT_READY)
-                    throw new InvalidRequestException(solveResponse.Request);
+                    throw new InvalidRequestException("Captcha error: " + solveResponse.Request);
 
                 OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha result: {solveResponse.Request}"));
             }
@@ -75,7 +78,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
         public string SolveRecaptchaV2(string siteKey, string pageUrl, bool invisible)
         {
-            string inUrl = $"http://rucaptcha.com/in.php?" +
+            string inUrl = $"{Url}/in.php?" +
                            $"key={Key}" +
                            $"&method=userrecaptcha" +
                            $"&googlekey={siteKey}" +
@@ -88,7 +91,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
         public string SolveHCaptcha(string siteKey, string pageUrl)
         {
-            string inUrl = $"http://rucaptcha.com/in.php?" +
+            string inUrl = $"{Url}/in.php?" +
                            $"key={Key}" +
                            $"&method=hcaptcha" +
                            $"&sitekey={siteKey}" +

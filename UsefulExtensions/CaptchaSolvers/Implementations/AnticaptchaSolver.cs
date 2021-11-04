@@ -43,7 +43,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             var inResponse = JsonConvert.DeserializeObject<AnticaptchaCreateTaskResult>(request.Post("http://api.anti-captcha.com/createTask", new StringContent(JsonConvert.SerializeObject(taskRequest))).ToString());
 
             if (inResponse.ErrorId != 0)
-                throw new InvalidRequestException(inResponse.ErrorId.ToString());
+                throw new InvalidRequestException("Captcha error: " + inResponse.ErrorId.ToString());
 
             OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.TaskId}"));
 
