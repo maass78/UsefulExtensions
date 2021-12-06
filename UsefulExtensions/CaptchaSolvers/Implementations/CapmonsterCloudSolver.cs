@@ -86,7 +86,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             return GetAnswer(inUrl);
         }
 
-        public string SolveHCaptcha(string siteKey, string pageUrl)
+        public string SolveHCaptcha(string siteKey, string pageUrl, bool invisible = false, string additionalData = null)
         {
             string inUrl = $"https://api.capmonster.cloud/in.php?" +
                            $"key={Key}" +

@@ -33,7 +33,7 @@ namespace UsefulExtensions.Mail
         /// <param name="password">Пароль</param>
         /// <param name="proxy">Прокси</param>
         /// <returns><c>true</c>, если почта действительна, иначе <c>false</c></returns>
-        public static bool IsValid(string mail, string password, ProxyClient proxy)
+        public static IsValidResult IsValid(string mail, string password, ProxyClient proxy)
         {
             if(ServerSelector == null)
             {
@@ -48,13 +48,30 @@ namespace UsefulExtensions.Mail
                 {
                     ProxyClient = proxy
                 };
-                client.Connect(server.Host, server.Port);
-                client.Authenticate(mail, password);
-                return true;
+
+                try
+                {
+                    client.Connect(server.Host, server.Port);
+                }
+                catch
+                {
+                    return IsValidResult.ConnectionError;
+                }
+
+                try
+                {
+                    client.Authenticate(mail, password);
+                }
+                catch
+                {
+                    return IsValidResult.AuthError;
+                }
+
+                return IsValidResult.Valid;
             }
             catch
             {
-                return false;
+                return IsValidResult.ConnectionError;
             }
         }
 

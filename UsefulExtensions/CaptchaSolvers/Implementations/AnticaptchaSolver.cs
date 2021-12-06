@@ -66,7 +66,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             return GetTaskResult<RecaptchaV2Solution>(request).GRecaptchaResponse;
         }
 
-        public string SolveHCaptcha(string siteKey, string pageUrl)
+        public string SolveHCaptcha(string siteKey, string pageUrl, bool invisible = false, string additionalData = null)
         {
             var request = new AnticaptchaСreateTaskRequest() { ClientKey = Key, Task = new HCaptchaTask() { Type = "HCaptchaTaskProxyless", WebsiteKey = siteKey, WebsiteURL = pageUrl } };
             return GetTaskResult<RecaptchaV2Solution>(request).GRecaptchaResponse;

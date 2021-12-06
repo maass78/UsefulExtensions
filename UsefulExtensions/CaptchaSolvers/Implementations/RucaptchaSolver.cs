@@ -89,14 +89,18 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             return GetAnswer(inUrl);
         }
 
-        public string SolveHCaptcha(string siteKey, string pageUrl)
+        public string SolveHCaptcha(string siteKey, string pageUrl, bool invisible = false, string additionalData = null)
         {
             string inUrl = $"{Url}/in.php?" +
                            $"key={Key}" +
                            $"&method=hcaptcha" +
                            $"&sitekey={siteKey}" +
                            $"&pageurl={pageUrl}" +
+                           $"&invisible={(invisible ? "1" : "0")}" +
                            $"&json=1";
+
+            if (additionalData != null)
+                inUrl += $"&data={additionalData}";
             
             return GetAnswer(inUrl);
         }

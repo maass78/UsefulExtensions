@@ -41,8 +41,10 @@ namespace UsefulExtensions.CaptchaSolvers
         /// </summary>
         /// <param name="siteKey">Значение параметра data-sitekey, которое вы нашли в коде страницы</param>
         /// <param name="pageUrl">Полный URL страницы, на которой вы решаете hCaptcha</param>
+        /// <param name="invisible">Используйте значение <see langword="true"/> для невидимой версии hcaptcha (в настоящее время встречается крайне редко)</param>
+        /// <param name="additionalData">Дополнительные данные для решения капчи - используется в очень редких случаях и только в сочетании с invisible=1</param>
         /// <returns>Токен решенной капчи</returns>
-        string SolveHCaptcha(string siteKey, string pageUrl);
+        string SolveHCaptcha(string siteKey, string pageUrl, bool invisible = false, string additionalData = null);
 
         /// <summary>
         /// Прокси
