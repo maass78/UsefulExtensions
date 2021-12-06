@@ -7,19 +7,19 @@
     <Authors>maass78</Authors>
     <Description>Библиотека, позволяющая очень просто выполнять действия, часто необходимые в создании чекеров/регеров и прочего софта для автоматизации каких-либо процессов на сайтах.</Description>
     <PackageIcon>UsefulExtensions1024x1024 transparent.png</PackageIcon>
-    <AssemblyVersion>1.0.7.0</AssemblyVersion>
-    <FileVersion>1.0.7.0</FileVersion>
+    <AssemblyVersion>1.0.8.0</AssemblyVersion>
+    <FileVersion>1.0.8.0</FileVersion>
     <PackageId>maass78.UsefulExtensions</PackageId>
     <RepositoryUrl>https://github.com/maass78/UsefulExtensions</RepositoryUrl>
     <PackageProjectUrl>https://github.com/maass78/UsefulExtensions</PackageProjectUrl>
     <NeutralLanguage>ru</NeutralLanguage>
-    <Version>1.0.7</Version>
+    <Version>1.0.8</Version>
+    <DebugType>portable</DebugType>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile></DocumentationFile>
-    <OutputPath></OutputPath>
-  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="icon.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Leaf.xNet" Version="5.2.10" />
@@ -28,9 +28,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="D:\Icons\Useful Extensions\UsefulExtensions1024x1024 transparent.png">
+    <Resource Include="icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="UsefulExtensions1024x1024 transparent.png">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
 
