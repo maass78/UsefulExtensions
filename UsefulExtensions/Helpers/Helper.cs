@@ -22,6 +22,11 @@ namespace UsefulExtensions
         /// <returns>Количество секунд, прошедших с 1 января 1970 г. Часовой пояс UTC</returns>
         public static long GetUnixSeconds() => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
+        /// <summary>
+        /// Возвращает Unix TimeStamp Seconds
+        /// </summary>
+        /// <param name="dateTime">Время, timestamp которого необходимо получить</param>
+        /// <returns>Количество секунд, прошедших с 1 января 1970 г. Часовой пояс UTC</returns>
         public static long GetUnixSeconds(DateTime dateTime) => new DateTimeOffset(dateTime).ToUnixTimeSeconds();
 
         /// <summary>
@@ -30,6 +35,11 @@ namespace UsefulExtensions
         /// <returns>Количество миллисекунд, прошедших с 1 января 1970 г. Часовой пояс UTC</returns>
         public static long GetUnixMilliseconds() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
+        /// <summary>
+        /// Возвращает Unix TimeStamp Milliseconds
+        /// </summary>
+        /// <param name="dateTime">Время, timestamp которого необходимо получить</param>
+        /// <returns>Количество миллисекунд, прошедших с 1 января 1970 г. Часовой пояс UTC</returns>
         public static long GetUnixMilliseconds(DateTime dateTime) => new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
         #endregion
 
@@ -66,6 +76,7 @@ namespace UsefulExtensions
             List<Account> output = new List<Account>();
             for (int i = 0; i < lines.Length; i++)
             {
+                
                 if (!string.IsNullOrWhiteSpace(lines[i]))
                 {
                     string[] data;
@@ -76,7 +87,11 @@ namespace UsefulExtensions
                     else
                         continue;
 
-                    output.Add(new Account(data[0], data[1]));
+                    try
+                    {
+                        output.Add(new Account(data[0], data[1]));
+                    }
+                    catch { }
                 }
             }
             return output;
