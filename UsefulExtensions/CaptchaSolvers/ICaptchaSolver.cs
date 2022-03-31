@@ -46,9 +46,6 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <returns>Токен решенной капчи</returns>
         string SolveHCaptcha(string siteKey, string pageUrl, bool invisible = false, string additionalData = null);
 
-
-        string SolvePictureCaptcha(string )
-
         /// <summary>
         /// Прокси
         /// </summary>
