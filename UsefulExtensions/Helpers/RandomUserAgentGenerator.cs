@@ -40,45 +40,6 @@ namespace UsefulExtensions
 
             return windowsVersion;
         }
-        
-        /// <summary>
-        /// Генерирует случайный User-Agent от браузера Opera.
-        /// </summary>
-        /// <returns>Случайный User-Agent от браузера Opera.</returns>
-        public static string GenerateOperaUserAgent()
-        {
-            string version;
-            string presto;
-
-            #region Генерация случайной версии
-
-            switch (_random.Next(4))
-            {
-                case 0:
-                    version = "12.16";
-                    presto = "2.12.388";
-                    break;
-
-                case 1:
-                    version = "12.14";
-                    presto = "2.12.388";
-                    break;
-
-                case 2:
-                    version = "12.02";
-                    presto = "2.10.289";
-                    break;
-
-                default:
-                    version = "12.00";
-                    presto = "2.10.181";
-                    break;
-            }
-
-            #endregion
-
-            return $"Opera/9.80 ({GenerateRandomWindowsVersion()}); U) Presto/{presto} Version/{version}";
-        }
 
         /// <summary>
         /// Генерирует случайный User-Agent от браузера Chrome.
@@ -86,15 +47,15 @@ namespace UsefulExtensions
         /// <returns>Случайный User-Agent от браузера Chrome.</returns>
         public static string GenerateChromeUserAgent()
         {
-            int major = _random.Next(62, 70);
-            int build = _random.Next(2100, 3538);
+            int major = _random.Next(90, 104);
+            int build = _random.Next(4430, 5006);
             int branchBuild = _random.Next(170);
 
             return $"Mozilla/5.0 ({GenerateRandomWindowsVersion()}) AppleWebKit/537.36 (KHTML, like Gecko) " +
                 $"Chrome/{major}.0.{build}.{branchBuild} Safari/537.36";
         }
 
-        private static readonly byte[] FirefoxVersions = { 64, 63, 62, 60, 58, 52, 51, 46, 45 };
+        private static readonly byte[] FirefoxVersions = { 89, 91, 99, 98, 97, 96, 95, 94, 93, 92, 100  };
 
         /// <summary>
         /// Генерирует случайный User-Agent от браузера Firefox.
@@ -121,12 +82,7 @@ namespace UsefulExtensions
             if (rand >= 1 && rand <= 70)
                 return GenerateChromeUserAgent();
 
-            // Firefox = 15%
-            if (rand > 70 && rand <= 85)
-                return GenerateFirefoxUserAgent();
-
-            // Opera = 15%
-            return GenerateOperaUserAgent();
+            return GenerateFirefoxUserAgent();
         }
     }
 }
