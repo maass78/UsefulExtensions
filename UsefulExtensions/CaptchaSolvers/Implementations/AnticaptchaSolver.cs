@@ -3,6 +3,7 @@ using Leaf.xNet;
 using Newtonsoft.Json;
 using System.Threading;
 using System;
+using UsefulExtensions.CaptchaSolvers.Models;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations
 {
@@ -29,57 +30,134 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
         public string SolveArkoseCaptcha(string publicKey, string surl, string pageUrl)
         {
-            var request = new AnticaptchaСreateTaskRequest() { ClientKey = Key, Task = new ArkoseCaptchaTask() { Type = "FunCaptchaTaskProxyless", WebsitePublicKey = publicKey, WebsiteURL = pageUrl, FuncaptchaApiJSSubdomain = surl } };
-            return GetTaskResult<ArkoseCaptchaSolution>(request).Token;
+            var task = new ArkoseCaptchaTask()
+            {
+                WebsitePublicKey = publicKey,
+                WebsiteURL = pageUrl,
+                FuncaptchaApiJSSubdomain = surl
+            };
+
+            return GetTaskResult<ArkoseCaptchaSolution, ArkoseCaptchaTask>(task).Token;
         }
 
-        private T GetTaskResult<T>(AnticaptchaСreateTaskRequest taskRequest)
+        private T GetTaskResult<T, Y>(Y task) where Y : AnticaptchaTask
         {
-            HttpRequest request = new HttpRequest();
-            if (Proxy != null)
-                request.Proxy = Proxy;
-
-            request.AddHeader("Content-Type", "application/json");
-            var inResponse = JsonConvert.DeserializeObject<AnticaptchaCreateTaskResult>(request.Post("http://api.anti-captcha.com/createTask", new StringContent(JsonConvert.SerializeObject(taskRequest))).ToString());
-
-            if (inResponse.ErrorId != 0)
-                throw new InvalidRequestException("Captcha error: " + inResponse.ErrorId.ToString());
-
-            OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.TaskId}"));
-
-            var taskResult = new AnticaptchaGetTaskResult<T>();
-            while (taskResult.Status != CAPTCHA_READY)
+            using (HttpRequest request = new HttpRequest())
             {
-                Thread.Sleep(_delay);
-                request.AddHeader("Content-Type", "application/json");
-                string getSolution = JsonConvert.SerializeObject(new AnticaptchaGetTaskRequest() { ClientKey = Key, TaskId = inResponse.TaskId });
-                taskResult = JsonConvert.DeserializeObject<AnticaptchaGetTaskResult<T>>(request.Post("https://api.anti-captcha.com/getTaskResult", new StringContent(getSolution)).ToString());
-                OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha status: {taskResult.Status})"));
-            }
+                if (Proxy != null)
+                    request.Proxy = Proxy;
 
-            return taskResult.Solution;
+                request.AddHeader("Content-Type", "application/json");
+
+                var createTaskRequest = new AnticaptchaСreateTaskRequest<Y>()
+                {
+                    ClientKey = Key,
+                    Task = task
+                };
+
+                var inResponse = JsonConvert.DeserializeObject<AnticaptchaCreateTaskResult>(
+                    request.Post("http://api.anti-captcha.com/createTask", 
+                    new StringContent(JsonConvert.SerializeObject(createTaskRequest))).ToString());
+
+                if (inResponse.ErrorId != 0)
+                    throw new InvalidRequestException("Captcha error: " + inResponse.ErrorId.ToString());
+
+                OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.TaskId}"));
+
+                var taskResult = new AnticaptchaGetTaskResult<T>();
+                while (taskResult.Status != CAPTCHA_READY)
+                {
+                    Thread.Sleep(_delay);
+                    
+                    request.AddHeader("Content-Type", "application/json");
+                    
+                    string getSolution = JsonConvert.SerializeObject(new AnticaptchaGetTaskRequest() { ClientKey = Key, TaskId = inResponse.TaskId });
+                    
+                    taskResult = JsonConvert.DeserializeObject<AnticaptchaGetTaskResult<T>>(request.Post("https://api.anti-captcha.com/getTaskResult", new StringContent(getSolution)).ToString());
+
+                    OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha status: {taskResult.Status})"));
+                }
+
+                return taskResult.Solution;
+            }
         }
 
         public string SolveRecaptchaV2(string siteKey, string pageUrl, bool invisible)
         {
-            var request = new AnticaptchaСreateTaskRequest() { ClientKey = Key, Task = new RecaptchaV2Task() { Type = "RecaptchaV2TaskProxyless", WebsiteKey = siteKey, WebsiteURL = pageUrl, IsInvisible = invisible  } };
-            return GetTaskResult<RecaptchaV2Solution>(request).GRecaptchaResponse;
+            var task = new RecaptchaV2Task()
+            {
+                WebsiteKey = siteKey,
+                WebsiteURL = pageUrl,
+                IsInvisible = invisible
+            };
+
+            return GetTaskResult<RecaptchaV2Solution, RecaptchaV2Task>(task).GRecaptchaResponse;
         }
 
         public string SolveHCaptcha(string siteKey, string pageUrl, bool invisible = false, string additionalData = null)
         {
-            var request = new AnticaptchaСreateTaskRequest() { ClientKey = Key, Task = new HCaptchaTask() { Type = "HCaptchaTaskProxyless", WebsiteKey = siteKey, WebsiteURL = pageUrl } };
-            return GetTaskResult<RecaptchaV2Solution>(request).GRecaptchaResponse;
+            var task = new HCaptchaTask()
+            {
+                WebsiteKey = siteKey,
+                WebsiteURL = pageUrl
+            };
+
+            return GetTaskResult<RecaptchaV2Solution, HCaptchaTask>(task).GRecaptchaResponse;
+        }
+
+        public GeeTestV3CaptchaResult SolveGeeTestV3Captcha(string gt, string challenge, string pageUrl, string apiServer = null)
+        {
+            var task = new GeeTestTask()
+            {
+                Gt = gt,
+                Challenge = challenge,
+                Version = 3,
+                WebsiteURL = pageUrl,
+                GeetestApiServerSubdomain = apiServer,
+            };
+
+            var result = GetTaskResult<GeeTestV3Solution, GeeTestTask>(task);
+
+            return new GeeTestV3CaptchaResult()
+            {
+                Challenge = result.Challenge,
+                Validate = result.Validate,
+                Seccode = result.Seccode
+            };
+        }
+
+        public GeeTestV4CaptchaResult SolveGeeTestV4Captcha(string captchaId, string pageUrl, string apiServer = null, string geetestGetLib = null, object initParametets = null)
+        {
+            var task = new GeeTestTask()
+            {
+                Gt = captchaId,
+                Version = 4,
+                WebsiteURL = pageUrl,
+                GeetestApiServerSubdomain = apiServer,
+                GeetestGetLib = geetestGetLib,
+                InitParameters = initParametets
+            };
+
+            var result = GetTaskResult<GeeTestV4Solution, GeeTestTask>(task);
+
+            return new GeeTestV4CaptchaResult()
+            {
+                CaptchaId = result.CaptchaId,
+                CaptchaOutput = result.CaptchaOutput,
+                GenTime = result.GenTime,
+                LotNumber = result.LotNumber,
+                PassToken = result.PassToken
+            };
         }
     }
 
-    class AnticaptchaСreateTaskRequest
+    class AnticaptchaСreateTaskRequest<T>
     {
         [JsonProperty("clientKey")]
         public string ClientKey { get; set; }
 
         [JsonProperty("task")]
-        public object Task { get; set; }
+        public T Task { get; set; }
     }
     class AnticaptchaCreateTaskResult
     {
@@ -136,10 +214,50 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public string Token { get; set; }
     }
 
-    class RecaptchaV2Task
+    class GeeTestV3Solution
+    {
+        [JsonProperty("challenge")]
+        public string Challenge { get; set; }
+
+        [JsonProperty("validate")]
+        public string Validate { get; set; }
+
+        [JsonProperty("seccode")]
+        public string Seccode { get; set; }
+    }
+
+    class GeeTestV4Solution 
+    {
+        [JsonProperty("captcha_id")]
+        public string CaptchaId { get; set; }
+
+        [JsonProperty("lot_number")]
+        public string LotNumber { get; set; }
+
+        [JsonProperty("pass_token")]
+        public string PassToken { get; set; }
+
+        [JsonProperty("gen_time")]
+        public int GenTime { get; set; }
+
+        [JsonProperty("captcha_output")]
+        public string CaptchaOutput { get; set; }
+    }
+
+    class AnticaptchaTask
     {
         [JsonProperty("type")]
         public string Type { get; set; }
+
+        public AnticaptchaTask(string type)
+        {
+            Type = type;
+        }
+    }
+
+    class RecaptchaV2Task : AnticaptchaTask
+    {
+        public RecaptchaV2Task() : base("RecaptchaV2TaskProxyless") {  }
 
         [JsonProperty("websiteURL")]
         public string WebsiteURL { get; set; }
@@ -150,10 +268,9 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         [JsonProperty("isInvisible")]
         public bool IsInvisible { get; set; }
     }
-    class ArkoseCaptchaTask
+    class ArkoseCaptchaTask : AnticaptchaTask
     {
-        [JsonProperty("type")]
-        public string Type { get; set; }
+        public ArkoseCaptchaTask() : base("FunCaptchaTaskProxyless") { }
 
         [JsonProperty("websiteURL")]
         public string WebsiteURL { get; set; }
@@ -167,15 +284,39 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         [JsonProperty("websitePublicKey")]
         public string WebsitePublicKey { get; set; }
     }
-    class HCaptchaTask
+    class HCaptchaTask : AnticaptchaTask
     {
-        [JsonProperty("type")]
-        public string Type { get; set; }
+        public HCaptchaTask() : base("HCaptchaTaskProxyless") { }
 
         [JsonProperty("websiteURL")]
         public string WebsiteURL { get; set; }
 
         [JsonProperty("websiteKey")]
         public string WebsiteKey { get; set; }
+    }
+    class GeeTestTask : AnticaptchaTask
+    {
+        public GeeTestTask() : base("GeeTestTaskProxyless") { }
+
+        [JsonProperty("websiteURL")]
+        public string WebsiteURL { get; set; }
+
+        [JsonProperty("gt")]
+        public string Gt { get; set; }
+
+        [JsonProperty("challenge")]
+        public string Challenge { get; set; }
+
+        [JsonProperty("version")]
+        public int Version { get; set; }
+
+        [JsonProperty("geetestApiServerSubdomain")]
+        public string GeetestApiServerSubdomain { get; set; }
+
+        [JsonProperty("geetestGetLib")]
+        public string GeetestGetLib { get; set; }
+
+        [JsonProperty("initParameters")]
+        public object InitParameters { get; set; }
     }
 }

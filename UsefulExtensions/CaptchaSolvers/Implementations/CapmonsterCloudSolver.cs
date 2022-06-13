@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Threading;
 using UsefulExtensions.CaptchaSolvers.Exceptions;
+using UsefulExtensions.CaptchaSolvers.Models;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations
 {
@@ -96,6 +97,16 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                            $"&json=1";
 
             return GetAnswer(inUrl);
+        }
+
+        public GeeTestV3CaptchaResult SolveGeeTestV3Captcha(string gt, string challenge, string pageUrl, string apiServer = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public GeeTestV4CaptchaResult SolveGeeTestV4Captcha(string captchaId, string pageUrl, string apiServer = null, string geetestGetLib = null, object initParametets = null)
+        {
+            throw new NotImplementedException();
         }
     }
 }

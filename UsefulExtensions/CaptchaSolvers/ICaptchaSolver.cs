@@ -1,5 +1,6 @@
 ﻿using Leaf.xNet;
 using System;
+using UsefulExtensions.CaptchaSolvers.Models;
 
 namespace UsefulExtensions.CaptchaSolvers
 {
@@ -45,6 +46,28 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <param name="additionalData">Дополнительные данные для решения капчи - используется в очень редких случаях и только в сочетании с invisible=1</param>
         /// <returns>Токен решенной капчи</returns>
         string SolveHCaptcha(string siteKey, string pageUrl, bool invisible = false, string additionalData = null);
+
+
+        /// <summary>
+        /// Решение Geetest - такого вида капчи, где требуется передвинуть кусок пазла или выбрать несколько объектов в нужном порядке.
+        /// </summary>
+        /// <param name="gt">Значение параметра gt, найденное на сайте (Публичный ключ домена, редко обновляется)</param>
+        /// <param name="challenge">Значение параметра challenge, найденное на сайте (Меняющийся ключ. Убедитесь что получаете каждый раз новый ключ для каждой капчи, иначе вы будете платить за каждую капчу с ошибкой)</param>
+        /// <param name="pageUrl"></param>
+        /// <param name="apiServer">Значение параметра api_server, найденное на сайте (Опциональный поддомен API. Может потребоваться для некоторых имплементаций)</param>
+        /// <returns></returns>
+        GeeTestV3CaptchaResult SolveGeeTestV3Captcha(string gt, string challenge, string pageUrl, string apiServer = null);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="captchaId">Значение captcha_id - обычно его можно найти внутри тега script, который подключает javascript код Geetest v4 на странице (на антикапче этот параметр приравнивается к gt, по сути менятся не должен)</param>
+        /// <param name="pageUrl">Адрес целевой страницы. Может находиться в любом месте сайта, в том числе в закрытом для подписчиков разделе. Наши работники не посещают сайт, а вместо этого эмулируют посещение страницы.</param>
+        /// <param name="apiServer">Значение параметра api_server, найденное на сайте (Опциональный поддомен API. Может потребоваться для некоторых имплементаций)</param>
+        /// <param name="geetestGetLib"></param>
+        /// <param name="initParametets"></param>
+        /// <returns></returns>
+        GeeTestV4CaptchaResult SolveGeeTestV4Captcha(string captchaId, string pageUrl, string apiServer = null, string geetestGetLib = null, object initParametets = null);
 
         /// <summary>
         /// Прокси
