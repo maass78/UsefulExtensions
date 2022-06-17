@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.Threading;
 using System;
 using UsefulExtensions.CaptchaSolvers.Models;
+using System.Collections.Generic;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations
 {
@@ -56,11 +57,11 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                 };
 
                 var inResponse = JsonConvert.DeserializeObject<AnticaptchaCreateTaskResult>(
-                    request.Post("http://api.anti-captcha.com/createTask", 
-                    new StringContent(JsonConvert.SerializeObject(createTaskRequest))).ToString());
+                    request.Post("http://api.anti-captcha.com/createTask",
+                    new StringContent(JsonConvert.SerializeObject(createTaskRequest, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore } ))).ToString());
 
                 if (inResponse.ErrorId != 0)
-                    throw new InvalidRequestException("Captcha error: " + inResponse.ErrorId.ToString());
+                    throw new CaptchaSolvingException(inResponse.ErrorId, this, $"Captcha error: {inResponse.ErrorCode} ({inResponse.ErrorDescription}) ID: {inResponse.ErrorId}");
 
                 OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.TaskId}"));
 
@@ -68,14 +69,17 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                 while (taskResult.Status != CAPTCHA_READY)
                 {
                     Thread.Sleep(_delay);
-                    
-                    request.AddHeader("Content-Type", "application/json");
-                    
-                    string getSolution = JsonConvert.SerializeObject(new AnticaptchaGetTaskRequest() { ClientKey = Key, TaskId = inResponse.TaskId });
-                    
-                    taskResult = JsonConvert.DeserializeObject<AnticaptchaGetTaskResult<T>>(request.Post("https://api.anti-captcha.com/getTaskResult", new StringContent(getSolution)).ToString());
 
-                    OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha status: {taskResult.Status})"));
+                    request.AddHeader("Content-Type", "application/json");
+
+                    string getSolution = JsonConvert.SerializeObject(new AnticaptchaGetTaskRequest() { ClientKey = Key, TaskId = inResponse.TaskId });
+
+                    taskResult = JsonConvert.DeserializeObject<AnticaptchaGetTaskResult<T>>(request.Post("https://api.anti-captcha.com/getTaskResult", new StringContent(getSolution)).ToString());
+                    
+                    if (taskResult.ErrorId != 0)
+                        throw new CaptchaSolvingException(taskResult.ErrorId, this, $"Captcha error: {taskResult.ErrorCode} ({taskResult.ErrorDescription}) ID: {taskResult.ErrorId}");
+
+                    OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha status: {taskResult.Status}"));
                 }
 
                 return taskResult.Solution;
@@ -149,6 +153,37 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                 PassToken = result.PassToken
             };
         }
+
+        /// <summary>
+        /// Решает кастомную AntiGate задачу
+        /// </summary>
+        /// <typeparam name="T">Тип объекта параметров</typeparam>
+        /// <param name="websiteUrl">Адрес целевой страницы, куда перейдет работник.</param>
+        /// <param name="templateName">Название шаблона сценария из нашей базы данных. Вы можете использовать существующий шаблон или создать свой. Можно поискать существующий шаблон на странице https://anti-captcha.com/ru/apidoc/task-types/AntiGateTask.</param>
+        /// <param name="variables">Объект, содержащий переменные шаблона и его значения.</param>
+        /// <param name="proxyAddress">Адрес прокси в ipv4/ipv6. Имена хостов или адреса из локальной сети не допускаются. Если не надо, указывайте <see langword="null"/>.</param>
+        /// <param name="proxyPort">Порт прокси. Если не надо, указывайте <see langword="null"/>.</param>
+        /// <param name="proxyLogin">Логин, если требуется авторизация прокси (basic). Если не надо, указывайте <see langword="null"/>.</param>
+        /// <param name="proxyPassword">Пароль прокси. Если не надо, указывайте <see langword="null"/>.</param>
+        /// <param name="domainsOfInterest">Список доменных имен, где мы должны собрать cookies и значения localStorage. Его также можно задать статично при редактировании шаблона.</param>
+        /// <returns>Данные браузера работника (куки, локальное хранилище и т. д.)</returns>
+        public CustomSolution SolveCustomCaptcha<T>(string websiteUrl, string templateName, T variables, 
+            string proxyAddress = null, int? proxyPort = null, string proxyLogin = null, string proxyPassword = null, List<string> domainsOfInterest = null)
+        {
+            var task = new CustomTask<T>()
+            {
+                WebsiteURL = websiteUrl,
+                TemplateName = templateName,
+                Variables = variables,
+                ProxyAddress = proxyAddress,
+                ProxyPort = proxyPort,
+                ProxyLogin = proxyLogin,
+                ProxyPassword = proxyPassword,
+                DomainsOfInterest = domainsOfInterest
+            };
+
+            return GetTaskResult<CustomSolution, CustomTask<T>>(task);
+        }
     }
 
     class AnticaptchaСreateTaskRequest<T>
@@ -163,6 +198,12 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
     {
         [JsonProperty("errorId")]
         public int ErrorId { get; set; }
+
+        [JsonProperty("errorDescription")]
+        public string ErrorDescription { get; set; }
+
+        [JsonProperty("errorCode")]
+        public string ErrorCode { get; set; }
 
         [JsonProperty("taskId")]
         public int TaskId { get; set; }
@@ -180,6 +221,12 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
     {
         [JsonProperty("errorId")]
         public int ErrorId { get; set; }
+
+        [JsonProperty("errorDescription")]
+        public string ErrorDescription { get; set; }
+
+        [JsonProperty("errorCode")]
+        public string ErrorCode { get; set; }
 
         [JsonProperty("status")]
         public string Status { get; set; }
@@ -226,7 +273,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public string Seccode { get; set; }
     }
 
-    class GeeTestV4Solution 
+    class GeeTestV4Solution
     {
         [JsonProperty("captcha_id")]
         public string CaptchaId { get; set; }
@@ -257,7 +304,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
     class RecaptchaV2Task : AnticaptchaTask
     {
-        public RecaptchaV2Task() : base("RecaptchaV2TaskProxyless") {  }
+        public RecaptchaV2Task() : base("RecaptchaV2TaskProxyless") { }
 
         [JsonProperty("websiteURL")]
         public string WebsiteURL { get; set; }
@@ -318,5 +365,68 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
         [JsonProperty("initParameters")]
         public object InitParameters { get; set; }
+    }
+
+
+    class CustomTask<T> : AnticaptchaTask
+    {
+        public CustomTask() : base("AntiGateTask") { }
+
+        [JsonProperty("websiteURL")]
+        public string WebsiteURL { get; set; }
+
+        [JsonProperty("templateName")]
+        public string TemplateName { get; set; }
+
+        [JsonProperty("variables")]
+        public T Variables { get; set; }
+
+        [JsonProperty("proxyAddress")]
+        public string ProxyAddress { get; set; }
+
+        [JsonProperty("proxyPort")]
+        public int? ProxyPort { get; set; }
+
+        [JsonProperty("proxyLogin")]
+        public string ProxyLogin { get; set; }
+
+        [JsonProperty("proxyPassword")]
+        public string ProxyPassword { get; set; }
+
+        [JsonProperty("domainsOfInterest")]
+        public List<string> DomainsOfInterest { get; set; }
+    }
+
+    public class CustomSolution
+    {
+        [JsonProperty("cookies")]
+        public Dictionary<string, string> Cookies { get; set; }
+
+        [JsonProperty("localStorage")]
+        public Dictionary<string, string> LocalStorage { get; set; }
+
+        [JsonProperty("fingerprint")]
+        public Dictionary<string, string> Fingerprint { get; set; }
+
+        [JsonProperty("url")]
+        public string Url { get; set; }
+
+        [JsonProperty("domain")]
+        public string Domain { get; set; }
+
+        [JsonProperty("domainsOfInterest")]
+        public Dictionary<string, DomainOfInterest> DomainsOfInterest { get; set; }
+        
+        public class DomainOfInterest
+        {
+            [JsonProperty("cookies")]
+            public Dictionary<string, string> Cookies { get; set; }
+
+            [JsonProperty("localStorage")]
+            public Dictionary<string, string> LocalStorage { get; set; }
+
+            [JsonProperty("fingerprint")]
+            public Dictionary<string, string> Fingerprint { get; set; }
+        }
     }
 }
