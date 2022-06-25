@@ -400,13 +400,13 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
     public class CustomSolution
     {
         [JsonProperty("cookies")]
-        public Dictionary<string, string> Cookies { get; set; }
+        public object Cookies { get; set; }
 
         [JsonProperty("localStorage")]
-        public Dictionary<string, string> LocalStorage { get; set; }
+        public object LocalStorage { get; set; }
 
         [JsonProperty("fingerprint")]
-        public Dictionary<string, string> Fingerprint { get; set; }
+        public object Fingerprint { get; set; }
 
         [JsonProperty("url")]
         public string Url { get; set; }
@@ -415,7 +415,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public string Domain { get; set; }
 
         [JsonProperty("domainsOfInterest")]
-        public Dictionary<string, DomainOfInterest> DomainsOfInterest { get; set; }
+        public object DomainsOfInterest { get; set; }
         
         public class DomainOfInterest
         {
@@ -423,10 +423,10 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             public Dictionary<string, string> Cookies { get; set; }
 
             [JsonProperty("localStorage")]
-            public Dictionary<string, string> LocalStorage { get; set; }
+            public Dictionary<string, object> LocalStorage { get; set; }
 
             [JsonProperty("fingerprint")]
-            public Dictionary<string, string> Fingerprint { get; set; }
+            public Dictionary<string, object> Fingerprint { get; set; }
         }
     }
 }
