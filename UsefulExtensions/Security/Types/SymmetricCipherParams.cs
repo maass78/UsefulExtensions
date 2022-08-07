@@ -48,29 +48,33 @@ namespace UsefulExtensions.Security.Types
         /// </summary>
         public SymmetricCipherParams()
         {
-
         }
 
         /// <summary>
         /// Пароль, используемый для генерации ключа
         /// </summary>
         public string Password { get; set; }
+
         /// <summary>
         /// Массив байтов, используемый для "соления" пароля
         /// </summary>
         public byte[] Salt { get; set; }
+
         /// <summary>
         /// Вектор инициализации
         /// </summary>
         public byte[] IV { get; set; }
+
         /// <summary>
-        /// Метод хэширования пароля
+        /// Метод хеширования пароля
         /// </summary>
         public HashAlgorithm HashAlgorithm { get; set; }
+
         /// <summary>
         /// Количество итераций генерации ключа
         /// </summary>
         public int Iterations { get; set; }
+
         /// <summary>
         /// Размер ключа в битах
         /// </summary>

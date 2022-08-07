@@ -9,215 +9,244 @@ using UsefulExtensions.SmsActivators.Types;
 
 namespace UsefulExtensions.SmsActivators
 {
-	/// <summary>
-	/// Базовый класс для реализаций совместимых с sms-activate.ru API
-	/// </summary>
+    /// <summary>
+    /// Р‘Р°Р·РѕРІС‹Р№ РєР»Р°СЃСЃ РґР»СЏ СЂРµР°Р»РёР·Р°С†РёР№ СЃРѕРІРјРµСЃС‚РёРјС‹С… СЃ sms-activate.ru API
+    /// </summary>
 	public abstract class SmsActivatorApiBase : ISmsActivator
-	{
-		/// <summary>
-		/// Сервисный ключ (apiKey) от сервиса смс активации
-		/// </summary>
-		public string ApiKey { get; protected set; }
-		protected abstract string ApiUrl { get; }
-		protected virtual string[] SuccessResponses => new string[2] { "ACCESS", "STATUS" };
+    {
+        /// <summary>
+        /// РЎРµСЂРІРёСЃРЅС‹Р№ РєР»СЋС‡ (apiKey) РѕС‚ СЃРµСЂРІРёСЃР° СЃРјСЃ Р°РєС‚РёРІР°С†РёРё
+        /// </summary>
+        public string ApiKey { get; protected set; }
 
-		/// <summary>
-		/// Констуктор по умолчанию
-		/// </summary>
-		/// <param name="apiKey">Сервисный ключ (apiKey) от сервиса смс активации</param>
-		public SmsActivatorApiBase(string apiKey)
-		{
-			ApiKey = apiKey;
-		}
+        /// <summary>
+        /// РџР°СЂС‚РЅРµСЂСЃРєРёР№ РєР»СЋС‡ (softId) РѕС‚ СЃРµСЂРІРёСЃР° СЃРјСЃ Р°РєС‚РёРІР°С†РёРё
+        /// </summary>
+        public string SoftId { get; protected set; }
 
-		/// <summary>
-		/// Возвращает баланс на сервисе смс активации
-		/// </summary>
-		/// <returns>Баланс на сервисе смс активации</returns>
-		public virtual decimal GetBalance()
+        /// <summary>
+        /// Endpoint СЃРµСЂРІРёСЃР° api
+        /// </summary>
+        protected abstract string ApiUrl { get; }
+
+        /// <summary>
+        /// РџРѕРјРµС‡Р°РµС‚ СЂРµР·СѓР»СЊС‚Р°С‚ РєР°Рє ACCESS РёР»Рё STATUS
+        /// </summary>
+        protected virtual string[] SuccessResponses => new string[2] { "ACCESS", "STATUS" };
+
+        /// <summary>
+        /// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
+        /// </summary>
+        /// <param name="apiKey">РЎРµСЂРІРёСЃРЅС‹Р№ РєР»СЋС‡ (apiKey) РѕС‚ СЃРµСЂРІРёСЃР° СЃРјСЃ Р°РєС‚РёРІР°С†РёРё</param>
+        /// <param name="softId">РџР°СЂС‚РЅРµСЂСЃРєРёР№ РєР»СЋС‡ (softId) РѕС‚ СЃРµСЂРІРёСЃР° СЃРјСЃ Р°РєС‚РёРІР°С†РёРё</param>
+        protected SmsActivatorApiBase(string apiKey, string softId = null)
         {
-			HttpRequest request = new HttpRequest();
-			RequestParams @params = new RequestParams()
-			{
-				{ GetParam("action", "getBalance") },
-				{ GetParam("api_key", ApiKey) },
-			};
-			string response = request.Post(ApiUrl, new FormUrlEncodedContent(@params)).ToString();
-
-			if (CheckForExceptions(response, out Exception ex))
-				throw ex;
-
-			return decimal.Parse(response.Split(':')[1], CultureInfo.InvariantCulture);
+            ApiKey = apiKey;
+            SoftId = softId ?? null;
         }
-		/// <summary>
-		/// Возвращает баланс на сервисе смс активации
-		/// </summary>
-		/// <returns>Баланс на сервисе смс активации</returns>
-		public virtual async Task<decimal> GetBalanceAsync() => await Task.Run(() => GetBalance());
 
-		/// <summary>
-		/// Бронирует номер
-		/// </summary>
-		/// <param name="service">Сервис, для которого нужно взять номер</param>
-		/// <param name="country">Страна (необязательно)</param>
-		/// <param name="operator">Оператор (необязательно)</param>
-		/// <returns>Класс <see cref="Number"/>, содержащий Id номера и сам номер телефона</returns>
-		public virtual Number GetNumber(string service, string country = null, string @operator = null)
+        /// <summary>
+        /// Р’РѕР·РІСЂР°С‰Р°РµС‚ Р±Р°Р»Р°РЅСЃ РЅР° СЃРµСЂРІРёСЃРµ СЃРјСЃ Р°РєС‚РёРІР°С†РёРё
+        /// </summary>
+        /// <returns>Р‘Р°Р»Р°РЅСЃ РЅР° СЃРµСЂРІРёСЃРµ СЃРјСЃ Р°РєС‚РёРІР°С†РёРё</returns>
+        public virtual decimal GetBalance()
         {
-			HttpRequest request = new HttpRequest();
-			RequestParams @params = new RequestParams()
-			{
-				{ GetParam("action", "getNumber") },
-				{ GetParam("api_key", ApiKey) },
-				{ GetParam("service", service) },
-			};
-			if (country != null)
-				@params.Add(GetParam("country", country));
-			if (@operator != null)
-				@params.Add(GetParam("operator", @operator));
-
-			string response = request.Post(ApiUrl, new FormUrlEncodedContent(@params)).ToString();
-
-			if (CheckForExceptions(response, out Exception ex))
-				throw ex;
-
-			string[] data = response.Split(':');
-			return new Number(int.Parse(data[1]), data[2]);
-		}
-		/// <summary>
-		/// Бронирует номер
-		/// </summary>
-		/// <param name="service">Сервис, для которого нужно взять номер</param>
-		/// <param name="country">Страна (необязательно)</param>
-		/// <param name="operator">Оператор (необязательно)</param>
-		/// <returns>Класс <see cref="Number"/>, содержащий Id номера и сам номер телефона</returns>
-		public virtual async Task<Number> GetNumberAsync(string service, string country = null, string @operator = null) => await Task.Run(() => GetNumber(service, country, @operator));
-
-		/// <summary>
-		/// Получает статус номера
-		/// </summary>
-		/// <param name="id">Id номера, содержится в экземпляре класса <see cref="Number"/></param>
-		/// <returns>Статус номера</returns>
-		public virtual Status GetStatus(int id)
-        {
-			HttpRequest request = new HttpRequest();
-			RequestParams @params = new RequestParams()
-			{
-				{ GetParam("action", "getStatus") },
-				{ GetParam("api_key", ApiKey) },
-				{ GetParam("id", id.ToString()) },
-			};
-			string response = request.Post(ApiUrl, new FormUrlEncodedContent(@params)).ToString();
-
-			if (CheckForExceptions(response, out Exception ex))
-				throw ex;
-
-			StatusEnum statusEnum = StatusEnum.StatusWaitCode;
-
-			if (response.StartsWith("STATUS_WAIT_CODE"))
-				statusEnum = StatusEnum.StatusWaitCode;
-			else if (response.StartsWith("STATUS_WAIT_RESEND"))
-				statusEnum = StatusEnum.StatusWaitCode;
-			else if (response.StartsWith("STATUS_WAIT_RETRY"))
-				statusEnum = StatusEnum.StatusWaitRetry;
-			else if (response.StartsWith("STATUS_CANCEL"))
-				statusEnum = StatusEnum.StatusCancel;
-			else if (response.StartsWith("STATUS_OK"))
-				statusEnum = StatusEnum.StatusOk;
-
-			if (statusEnum == StatusEnum.StatusOk || statusEnum == StatusEnum.StatusWaitRetry)
-				return new Status(statusEnum, response.Substring(response.IndexOf(':') + 1));
-
-			return new Status(statusEnum, null);
-		}
-		/// <summary>
-		/// Получает статус номера
-		/// </summary>
-		/// <param name="id">Id номера, содержится в экземпляре класса <see cref="Number"/></param>
-		/// <returns>Статус номера</returns>
-		public virtual async Task<Status> GetStatusAsync(int id) => await Task.Run(() => GetStatus(id));
-
-		/// <summary>
-		/// Устанавливает статус номера
-		/// </summary>
-		/// <param name="id">Id номера, содержится в экземпляре класса <see cref="Number"/></param>
-		/// <param name="status">Статус, который необходимо установить</param>
-		/// <returns>Результат установки статуса</returns>
-		public virtual SetStatusResult SetStatus(int id, SetStatusEnum status)
-        {
-			HttpRequest request = new HttpRequest();
-			RequestParams @params = new RequestParams()
-			{
-				{ GetParam("action", "setStatus") },
-				{ GetParam("api_key", ApiKey) },
-				{ GetParam("id", id.ToString()) },
-				{ GetParam("status", ((int)status).ToString()) }
-			};
-
-			string response = request.Post(ApiUrl, new FormUrlEncodedContent(@params)).ToString();
-
-			if (CheckForExceptions(response, out Exception ex))
-				throw ex;
-
-			SetStatusResult result = SetStatusResult.AccessReady;
-
-			switch (response)
-			{
-				case "ACCESS_READY":
-					result = SetStatusResult.AccessReady;
-					break;
-				case "ACCESS_RETRY_GET":
-					result = SetStatusResult.AccessReadyGet;
-					break;
-				case "ACCESS_ACTIVATION":
-					result = SetStatusResult.AccessActivation;
-					break;
-				case "ACCESS_CANCEL":
-					result = SetStatusResult.AccessCancel;
-					break;
-			}
-			return result;
-		}
-		/// <summary>
-		/// Устанавливает статус номера
-		/// </summary>
-		/// <param name="id">Id номера, содержится в экземпляре класса <see cref="Number"/></param>
-		/// <param name="status">Статус, который необходимо установить</param>
-		/// <returns>Результат установки статуса</returns>
-		public virtual async Task<SetStatusResult> SetStatusAsync(int id, SetStatusEnum status) => await Task.Run(() => SetStatus(id, status));
-
-		private bool CheckForExceptions(string response, out Exception ex)
-		{
-			if (!SuccessResponses.Any((string s) => response.StartsWith(s)))
-			{
-				if (response.StartsWith("BAD_KEY"))
-				{
-					ex = new SmsBadKeyException();
-				}
-				if (response.StartsWith("BAD_ACTION"))
-				{
-					ex = new SmsBadKeyException();
-				}
-				if (response.StartsWith("NO_NUMBERS"))
-				{
-					ex = new SmsNoNumbersException();
-				}
-				if (response.StartsWith("NO_BALANCE"))
-				{
-					ex = new SmsNoBalanceException();
-				}
-				ex = new SmsActivatorException(response);
-				return true;
-			}
-            else
+            HttpRequest request = new HttpRequest();
+            RequestParams @params = new RequestParams()
             {
-				ex = null;
-				return false;
-            }
-		}
-		private KeyValuePair<string, string> GetParam(string name, string value)
-        {
-			return new KeyValuePair<string, string>(name, value);
+                { GetParam("action", "getBalance") },
+                { GetParam("api_key", ApiKey) },
+            };
+            string response = request.Post(ApiUrl, new FormUrlEncodedContent(@params)).ToString();
+
+            if(CheckForExceptions(response, out Exception ex))
+                throw ex;
+
+            return decimal.Parse(response.Split(':')[1], CultureInfo.InvariantCulture);
         }
-	}
+
+        /// <summary>
+        /// Р’РѕР·РІСЂР°С‰Р°РµС‚ Р±Р°Р»Р°РЅСЃ РЅР° СЃРµСЂРІРёСЃРµ СЃРјСЃ Р°РєС‚РёРІР°С†РёРё
+        /// </summary>
+        /// <returns>Р‘Р°Р»Р°РЅСЃ РЅР° СЃРµСЂРІРёСЃРµ СЃРјСЃ Р°РєС‚РёРІР°С†РёРё</returns>
+        public virtual Task<decimal> GetBalanceAsync() => Task.Run(GetBalance);
+
+        /// <summary>
+        /// Р‘СЂРѕРЅРёСЂСѓРµС‚ РЅРѕРјРµСЂ
+        /// </summary>
+        /// <param name="service">РЎРµСЂРІРёСЃ, РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ РЅСѓР¶РЅРѕ РІР·СЏС‚СЊ РЅРѕРјРµСЂ</param>
+        /// <param name="softId">РљР»СЋС‡ РїР°СЂС‚РЅРµСЂР° (РЅРµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)</param>
+        /// <param name="country">РЎС‚СЂР°РЅР° (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)</param>
+        /// <param name="operator">РћРїРµСЂР°С‚РѕСЂ (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)</param>
+        /// <returns>РљР»Р°СЃСЃ <see cref="Number"/>, СЃРѕРґРµСЂР¶Р°С‰РёР№ Id РЅРѕРјРµСЂР° Рё СЃР°Рј РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°</returns>
+        public virtual Number GetNumber(string service, string softId = null, string country = null, string @operator = null)
+        {
+            HttpRequest request = new HttpRequest();
+
+            RequestParams @params = new RequestParams()
+            {
+                { GetParam("action", "getNumber") },
+                { GetParam("api_key", ApiKey) },
+                { GetParam("service", service) }
+            };
+            if(softId != null)
+            {
+                @params.Add(GetParam("softId", softId));
+            }
+            if(country != null)
+                @params.Add(GetParam("country", country));
+            if(@operator != null)
+                @params.Add(GetParam("operator", @operator));
+
+            string response = request.Post(ApiUrl, new FormUrlEncodedContent(@params)).ToString();
+
+            if(CheckForExceptions(response, out Exception ex))
+                throw ex;
+
+            string[] data = response.Split(':');
+            return new Number(int.Parse(data[1]), data[2]);
+        }
+
+        /// <summary>
+        /// Р‘СЂРѕРЅРёСЂСѓРµС‚ РЅРѕРјРµСЂ
+        /// </summary>
+        /// <param name="service">РЎРµСЂРІРёСЃ, РґР»СЏ РєРѕС‚РѕСЂРѕРіРѕ РЅСѓР¶РЅРѕ РІР·СЏС‚СЊ РЅРѕРјРµСЂ</param>
+        /// <param name="softId">РљР»СЋС‡ РїР°СЂС‚РЅРµСЂР° (РЅРµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)</param>
+        /// <param name="country">РЎС‚СЂР°РЅР° (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)</param>
+        /// <param name="operator">РћРїРµСЂР°С‚РѕСЂ (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)</param>
+        /// <returns>РљР»Р°СЃСЃ <see cref="Number"/>, СЃРѕРґРµСЂР¶Р°С‰РёР№ Id РЅРѕРјРµСЂР° Рё СЃР°Рј РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°</returns>
+        public virtual Task<Number> GetNumberAsync(string service, string softId = null, string country = null, string @operator = null) => Task.Run(() => GetNumber(service, softId, country, @operator));
+
+        /// <summary>
+        /// РџРѕР»СѓС‡Р°РµС‚ СЃС‚Р°С‚СѓСЃ РЅРѕРјРµСЂР°
+        /// </summary>
+        /// <param name="id">Id РЅРѕРјРµСЂР°, СЃРѕРґРµСЂР¶РёС‚СЃСЏ РІ СЌРєР·РµРјРїР»СЏСЂРµ РєР»Р°СЃСЃР° <see cref="Number"/></param>
+        /// <returns>РЎС‚Р°С‚СѓСЃ РЅРѕРјРµСЂР°</returns>
+        public virtual Status GetStatus(int id)
+        {
+            HttpRequest request = new HttpRequest();
+            RequestParams @params = new RequestParams()
+            {
+                { GetParam("action", "getStatus") },
+                { GetParam("api_key", ApiKey) },
+                { GetParam("id", id.ToString()) },
+            };
+            string response = request.Post(ApiUrl, new FormUrlEncodedContent(@params)).ToString();
+
+            if(CheckForExceptions(response, out Exception ex))
+                throw ex;
+
+            StatusEnum statusEnum = StatusEnum.StatusWaitCode;
+
+            if(response.StartsWith("STATUS_WAIT_CODE"))
+                statusEnum = StatusEnum.StatusWaitCode;
+            else if(response.StartsWith("STATUS_WAIT_RESEND"))
+                statusEnum = StatusEnum.StatusWaitCode;
+            else if(response.StartsWith("STATUS_WAIT_RETRY"))
+                statusEnum = StatusEnum.StatusWaitRetry;
+            else if(response.StartsWith("STATUS_CANCEL"))
+                statusEnum = StatusEnum.StatusCancel;
+            else if(response.StartsWith("STATUS_OK"))
+                statusEnum = StatusEnum.StatusOk;
+
+            if(statusEnum == StatusEnum.StatusOk || statusEnum == StatusEnum.StatusWaitRetry)
+                return new Status(statusEnum, response.Substring(response.IndexOf(':') + 1));
+
+            return new Status(statusEnum, null);
+        }
+
+        /// <summary>
+        /// РџРѕР»СѓС‡Р°РµС‚ СЃС‚Р°С‚СѓСЃ РЅРѕРјРµСЂР°
+        /// </summary>
+        /// <param name="id">Id РЅРѕРјРµСЂР°, СЃРѕРґРµСЂР¶РёС‚СЃСЏ РІ СЌРєР·РµРјРїР»СЏСЂРµ РєР»Р°СЃСЃР° <see cref="Number"/></param>
+        /// <returns>РЎС‚Р°С‚СѓСЃ РЅРѕРјРµСЂР°</returns>
+        public virtual Task<Status> GetStatusAsync(int id) => Task.Run(() => GetStatus(id));
+
+        /// <summary>
+        /// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ СЃС‚Р°С‚СѓСЃ РЅРѕРјРµСЂР°
+        /// </summary>
+        /// <param name="id">Id РЅРѕРјРµСЂР°, СЃРѕРґРµСЂР¶РёС‚СЃСЏ РІ СЌРєР·РµРјРїР»СЏСЂРµ РєР»Р°СЃСЃР° <see cref="Number"/></param>
+        /// <param name="status">РЎС‚Р°С‚СѓСЃ, РєРѕС‚РѕСЂС‹Р№ РЅРµРѕР±С…РѕРґРёРјРѕ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ</param>
+        /// <returns>Р РµР·СѓР»СЊС‚Р°С‚ СѓСЃС‚Р°РЅРѕРІРєРё СЃС‚Р°С‚СѓСЃР°</returns>
+        public virtual SetStatusResult SetStatus(int id, SetStatusEnum status)
+        {
+            HttpRequest request = new HttpRequest();
+            RequestParams @params = new RequestParams()
+            {
+                { GetParam("action", "setStatus") },
+                { GetParam("api_key", ApiKey) },
+                { GetParam("id", id.ToString()) },
+                { GetParam("status", ((int)status).ToString()) }
+            };
+
+            string response = request.Post(ApiUrl, new FormUrlEncodedContent(@params)).ToString();
+
+            if(CheckForExceptions(response, out Exception ex))
+                throw ex;
+
+            SetStatusResult result = SetStatusResult.AccessReady;
+
+            switch(response)
+            {
+                case "ACCESS_READY":
+                    result = SetStatusResult.AccessReady;
+                    break;
+
+                case "ACCESS_RETRY_GET":
+                    result = SetStatusResult.AccessReadyGet;
+                    break;
+
+                case "ACCESS_ACTIVATION":
+                    result = SetStatusResult.AccessActivation;
+                    break;
+
+                case "ACCESS_CANCEL":
+                    result = SetStatusResult.AccessCancel;
+                    break;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ СЃС‚Р°С‚СѓСЃ РЅРѕРјРµСЂР°
+        /// </summary>
+        /// <param name="id">Id РЅРѕРјРµСЂР°, СЃРѕРґРµСЂР¶РёС‚СЃСЏ РІ СЌРєР·РµРјРїР»СЏСЂРµ РєР»Р°СЃСЃР° <see cref="Number"/></param>
+        /// <param name="status">РЎС‚Р°С‚СѓСЃ, РєРѕС‚РѕСЂС‹Р№ РЅРµРѕР±С…РѕРґРёРјРѕ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ</param>
+        /// <returns>Р РµР·СѓР»СЊС‚Р°С‚ СѓСЃС‚Р°РЅРѕРІРєРё СЃС‚Р°С‚СѓСЃР°</returns>
+        public virtual Task<SetStatusResult> SetStatusAsync(int id, SetStatusEnum status) => Task.Run(() => SetStatus(id, status));
+
+        private bool CheckForExceptions(string response, out Exception ex)
+        {
+            if(!SuccessResponses.Any(response.StartsWith))
+            {
+                if(response.StartsWith("BAD_KEY"))
+                {
+                    ex = new SmsBadKeyException();
+                }
+                if(response.StartsWith("BAD_ACTION"))
+                {
+                    ex = new SmsBadKeyException();
+                }
+                if(response.StartsWith("NO_NUMBERS"))
+                {
+                    ex = new SmsNoNumbersException();
+                }
+                if(response.StartsWith("NO_BALANCE"))
+                {
+                    ex = new SmsNoBalanceException();
+                }
+                ex = new SmsActivatorException(response);
+                return true;
+            } else
+            {
+                ex = null;
+                return false;
+            }
+        }
+
+        private static KeyValuePair<string, string> GetParam(string name, string value)
+        {
+            return new KeyValuePair<string, string>(name, value);
+        }
+    }
 }

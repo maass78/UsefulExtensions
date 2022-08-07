@@ -1,10 +1,10 @@
-﻿using UsefulExtensions.CaptchaSolvers.Exceptions;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 using Leaf.xNet;
 using Newtonsoft.Json;
-using System.Threading;
-using System;
+using UsefulExtensions.CaptchaSolvers.Exceptions;
 using UsefulExtensions.CaptchaSolvers.Models;
-using System.Collections.Generic;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations
 {
@@ -43,9 +43,9 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
         private T GetTaskResult<T, Y>(Y task) where Y : AnticaptchaTask
         {
-            using (HttpRequest request = new HttpRequest())
+            using(HttpRequest request = new HttpRequest())
             {
-                if (Proxy != null)
+                if(Proxy != null)
                     request.Proxy = Proxy;
 
                 request.AddHeader("Content-Type", "application/json");
@@ -58,15 +58,15 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
                 var inResponse = JsonConvert.DeserializeObject<AnticaptchaCreateTaskResult>(
                     request.Post("http://api.anti-captcha.com/createTask",
-                    new StringContent(JsonConvert.SerializeObject(createTaskRequest, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore } ))).ToString());
+                    new StringContent(JsonConvert.SerializeObject(createTaskRequest, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore }))).ToString());
 
-                if (inResponse.ErrorId != 0)
+                if(inResponse.ErrorId != 0)
                     throw new CaptchaSolvingException(inResponse.ErrorId, this, $"Captcha error: {inResponse.ErrorCode} ({inResponse.ErrorDescription}) ID: {inResponse.ErrorId}");
 
                 OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.TaskId}"));
 
                 var taskResult = new AnticaptchaGetTaskResult<T>();
-                while (taskResult.Status != CAPTCHA_READY)
+                while(taskResult.Status != CAPTCHA_READY)
                 {
                     Thread.Sleep(_delay);
 
@@ -75,8 +75,8 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                     string getSolution = JsonConvert.SerializeObject(new AnticaptchaGetTaskRequest() { ClientKey = Key, TaskId = inResponse.TaskId });
 
                     taskResult = JsonConvert.DeserializeObject<AnticaptchaGetTaskResult<T>>(request.Post("https://api.anti-captcha.com/getTaskResult", new StringContent(getSolution)).ToString());
-                    
-                    if (taskResult.ErrorId != 0)
+
+                    if(taskResult.ErrorId != 0)
                         throw new CaptchaSolvingException(taskResult.ErrorId, this, $"Captcha error: {taskResult.ErrorCode} ({taskResult.ErrorDescription}) ID: {taskResult.ErrorId}");
 
                     OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha status: {taskResult.Status}"));
@@ -167,7 +167,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         /// <param name="proxyPassword">Пароль прокси. Если не надо, указывайте <see langword="null"/>.</param>
         /// <param name="domainsOfInterest">Список доменных имен, где мы должны собрать cookies и значения localStorage. Его также можно задать статично при редактировании шаблона.</param>
         /// <returns>Данные браузера работника (куки, локальное хранилище и т. д.)</returns>
-        public CustomSolution SolveCustomCaptcha<T>(string websiteUrl, string templateName, T variables, 
+        public CustomSolution SolveCustomCaptcha<T>(string websiteUrl, string templateName, T variables,
             string proxyAddress = null, int? proxyPort = null, string proxyLogin = null, string proxyPassword = null, List<string> domainsOfInterest = null)
         {
             var task = new CustomTask<T>()
@@ -186,7 +186,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         }
     }
 
-    class AnticaptchaСreateTaskRequest<T>
+    internal class AnticaptchaСreateTaskRequest<T>
     {
         [JsonProperty("clientKey")]
         public string ClientKey { get; set; }
@@ -194,7 +194,8 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         [JsonProperty("task")]
         public T Task { get; set; }
     }
-    class AnticaptchaCreateTaskResult
+
+    internal class AnticaptchaCreateTaskResult
     {
         [JsonProperty("errorId")]
         public int ErrorId { get; set; }
@@ -209,7 +210,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public int TaskId { get; set; }
     }
 
-    class AnticaptchaGetTaskRequest
+    internal class AnticaptchaGetTaskRequest
     {
         [JsonProperty("clientKey")]
         public string ClientKey { get; set; }
@@ -217,7 +218,8 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         [JsonProperty("taskId")]
         public int TaskId { get; set; }
     }
-    class AnticaptchaGetTaskResult<T>
+
+    internal class AnticaptchaGetTaskResult<T>
     {
         [JsonProperty("errorId")]
         public int ErrorId { get; set; }
@@ -250,18 +252,19 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public string SolveCount { get; set; }
     }
 
-    class RecaptchaV2Solution
+    internal class RecaptchaV2Solution
     {
         [JsonProperty("gRecaptchaResponse")]
         public string GRecaptchaResponse { get; set; }
     }
+
     class ArkoseCaptchaSolution
     {
         [JsonProperty("token")]
         public string Token { get; set; }
     }
 
-    class GeeTestV3Solution
+    internal class GeeTestV3Solution
     {
         [JsonProperty("challenge")]
         public string Challenge { get; set; }
@@ -273,7 +276,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public string Seccode { get; set; }
     }
 
-    class GeeTestV4Solution
+    internal class GeeTestV4Solution
     {
         [JsonProperty("captcha_id")]
         public string CaptchaId { get; set; }
@@ -291,7 +294,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public string CaptchaOutput { get; set; }
     }
 
-    class AnticaptchaTask
+    internal class AnticaptchaTask
     {
         [JsonProperty("type")]
         public string Type { get; set; }
@@ -304,7 +307,9 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
     class RecaptchaV2Task : AnticaptchaTask
     {
-        public RecaptchaV2Task() : base("RecaptchaV2TaskProxyless") { }
+        public RecaptchaV2Task() : base("RecaptchaV2TaskProxyless")
+        {
+        }
 
         [JsonProperty("websiteURL")]
         public string WebsiteURL { get; set; }
@@ -315,9 +320,12 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         [JsonProperty("isInvisible")]
         public bool IsInvisible { get; set; }
     }
-    class ArkoseCaptchaTask : AnticaptchaTask
+
+    internal class ArkoseCaptchaTask : AnticaptchaTask
     {
-        public ArkoseCaptchaTask() : base("FunCaptchaTaskProxyless") { }
+        public ArkoseCaptchaTask() : base("FunCaptchaTaskProxyless")
+        {
+        }
 
         [JsonProperty("websiteURL")]
         public string WebsiteURL { get; set; }
@@ -331,9 +339,12 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         [JsonProperty("websitePublicKey")]
         public string WebsitePublicKey { get; set; }
     }
-    class HCaptchaTask : AnticaptchaTask
+
+    internal class HCaptchaTask : AnticaptchaTask
     {
-        public HCaptchaTask() : base("HCaptchaTaskProxyless") { }
+        public HCaptchaTask() : base("HCaptchaTaskProxyless")
+        {
+        }
 
         [JsonProperty("websiteURL")]
         public string WebsiteURL { get; set; }
@@ -341,9 +352,12 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         [JsonProperty("websiteKey")]
         public string WebsiteKey { get; set; }
     }
+
     class GeeTestTask : AnticaptchaTask
     {
-        public GeeTestTask() : base("GeeTestTaskProxyless") { }
+        public GeeTestTask() : base("GeeTestTaskProxyless")
+        {
+        }
 
         [JsonProperty("websiteURL")]
         public string WebsiteURL { get; set; }
@@ -367,10 +381,11 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public object InitParameters { get; set; }
     }
 
-
-    class CustomTask<T> : AnticaptchaTask
+    internal class CustomTask<T> : AnticaptchaTask
     {
-        public CustomTask() : base("AntiGateTask") { }
+        public CustomTask() : base("AntiGateTask")
+        {
+        }
 
         [JsonProperty("websiteURL")]
         public string WebsiteURL { get; set; }
@@ -416,7 +431,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
         [JsonProperty("domainsOfInterest")]
         public object DomainsOfInterest { get; set; }
-        
+
         public class DomainOfInterest
         {
             [JsonProperty("cookies")]

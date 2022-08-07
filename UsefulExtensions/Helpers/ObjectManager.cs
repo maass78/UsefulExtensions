@@ -19,7 +19,7 @@ namespace UsefulExtensions
         public List<T> Objects { get; }
 
         /// <summary>
-        /// Текущий индекс объекта в списке 
+        /// Текущий индекс объекта в списке
         /// </summary>
         public int CurIndex;
 
@@ -40,11 +40,11 @@ namespace UsefulExtensions
         /// <returns>Следующий по списку объект. Если достигнут конец списка, значение по умолчанию для value-типов или <see langword="null"/> для ссылочных</returns>
         public T GetNextObject()
         {
-            lock (Sync)
+            lock(Sync)
             {
-                if (CurIndex >= Objects.Count)
+                if(CurIndex >= Objects.Count)
                 {
-                    if (AutoReset)
+                    if(AutoReset)
                         CurIndex = 0;
                     else
                         return default;
@@ -63,7 +63,7 @@ namespace UsefulExtensions
         }
 
         /// <summary>
-        /// Возвращает или задаёт значение, будет ли перечисление начинаться заново после достижения конца списка. По умолчанию - <see langword="false"/>
+        /// Возвратит или задаст значение, будет ли перечисление начинаться заново после достижения конца списка. По умолчанию - <see langword="false"/>
         /// </summary>
         public bool AutoReset { get; set; }
     }

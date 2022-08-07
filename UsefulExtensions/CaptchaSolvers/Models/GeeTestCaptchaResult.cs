@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace UsefulExtensions.CaptchaSolvers.Models
+﻿namespace UsefulExtensions.CaptchaSolvers.Models
 {
     /// <summary>
     /// Класс, содержащий информацию об решении капчи geetest
@@ -23,7 +19,6 @@ namespace UsefulExtensions.CaptchaSolvers.Models
         /// Еще одна строка, мы без понятия зачем их 3 штуки.
         /// </summary>
         public string Seccode { get; set; }
-
     }
 
     public class GeeTestV4CaptchaResult

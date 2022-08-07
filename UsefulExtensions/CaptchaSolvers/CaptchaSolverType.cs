@@ -3,7 +3,7 @@
 namespace UsefulExtensions.CaptchaSolvers
 {
     /// <summary>
-    /// Тип решателя капчи. Обычно используется для выбора сервиса решения капчи в графическом интерфейсе.
+    /// Тип средства решения капч. Обычно используется для выбора сервиса решения капчи в графическом интерфейсе.
     /// </summary>
     public enum CaptchaSolverType
     {
@@ -11,10 +11,12 @@ namespace UsefulExtensions.CaptchaSolvers
         /// https://rucaptcha.com/
         /// </summary>
         Rucaptcha,
+
         /// <summary>
         /// https://anti-captcha.com/
         /// </summary>
         AntiCaptcha,
+
         /// <summary>
         /// https://capmonster.cloud/ru/
         /// </summary>
@@ -24,7 +26,7 @@ namespace UsefulExtensions.CaptchaSolvers
     /// <summary>
     /// Предоставляет методы расширения для перечисления <see cref="CaptchaSolverType"/>
     /// </summary>
-    public static class CaptchaSolverTypeExtensions 
+    public static class CaptchaSolverTypeExtensions
     {
         /// <summary>
         /// Получение <see cref="ICaptchaSolver"/> по типу используемого сервиса
@@ -34,7 +36,7 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <returns>Одна из стандартных реализаций интерфейса <see cref="ICaptchaSolver"/> в зависимости от указанного типа</returns>
         public static ICaptchaSolver GetCaptchaSolverByType(this CaptchaSolverType type, string apiKey)
         {
-            switch (type)
+            switch(type)
             {
                 case CaptchaSolverType.Rucaptcha:
                     return new RucaptchaSolver(apiKey);

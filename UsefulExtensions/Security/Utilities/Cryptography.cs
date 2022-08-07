@@ -15,7 +15,7 @@ namespace UsefulExtensions.Security.Utilities
         public static byte[] GenerateRandomBytes(int bufferSize)
         {
             byte[] bytes = new byte[bufferSize];
-            using (RNGCryptoServiceProvider random = new RNGCryptoServiceProvider())
+            using(RNGCryptoServiceProvider random = new RNGCryptoServiceProvider())
             {
                 random.GetBytes(bytes);
             }
