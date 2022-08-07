@@ -50,13 +50,12 @@ namespace UsefulExtensions
 
             string result = _source;
 
-            foreach (var match in matches)
+            foreach(var match in matches)
             {
                 result = result.Replace(match.Value, match.Groups[_random.Next() % 2 == 0 ? 1 : 2].Value);
             }
 
             return result;
         }
-
     }
 }

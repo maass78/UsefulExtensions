@@ -46,7 +46,7 @@
         /// <summary>
         /// Возвращает строковое представление аккаунта в формате <c>login:password</c>
         /// </summary>
-        /// <returns>Cтроковое представление аккаунта в формате <c>login:password</c></returns>
+        /// <returns>Строковое представление аккаунта в формате <c>login:password</c></returns>
         public override string ToString() => ToString(":");
 
         /// <summary>

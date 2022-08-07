@@ -1,5 +1,5 @@
-﻿using Leaf.xNet;
-using System;
+﻿using System;
+using Leaf.xNet;
 using UsefulExtensions.CaptchaSolvers.Models;
 
 namespace UsefulExtensions.CaptchaSolvers
@@ -31,7 +31,7 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <param name="pageUrl">Полный URL страницы, на которой вы решаете FunCaptcha</param>
         /// <returns>Токен решенной капчи</returns>
         /// <remarks>
-        /// Вам нужно найти публичный ключ FunCaptcha и сервисный URL (surl). 
+        /// Вам нужно найти публичный ключ FunCaptcha и сервисный URL (surl).
         /// <para/> Публичный ключ можно найти в значении параметра data-pkey у div с FunCaptcha или же найти элемент с именем fc-token, а из его значения вырезать ключ, который указан после pk.
         /// <para/> Сервисный URL можно найти в том же элементе с именем fc-token - это значение после surl. Этот параметр не обязателен и если вы его не указали - мы используем значение по умолчанию, которое работает в большинстве случаев. Но все же мы рекомендуем его указывать на случай, если на сайте используется нестандартный вариант.
         /// </remarks>
@@ -47,7 +47,6 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <returns>Токен решенной капчи</returns>
         string SolveHCaptcha(string siteKey, string pageUrl, bool invisible = false, string additionalData = null);
 
-
         /// <summary>
         /// Решение Geetest - такого вида капчи, где требуется передвинуть кусок пазла или выбрать несколько объектов в нужном порядке.
         /// </summary>
@@ -59,9 +58,9 @@ namespace UsefulExtensions.CaptchaSolvers
         GeeTestV3CaptchaResult SolveGeeTestV3Captcha(string gt, string challenge, string pageUrl, string apiServer = null);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
-        /// <param name="captchaId">Значение captcha_id - обычно его можно найти внутри тега script, который подключает javascript код Geetest v4 на странице (на антикапче этот параметр приравнивается к gt, по сути менятся не должен)</param>
+        /// <param name="captchaId">Значение captcha_id - обычно его можно найти внутри тега script, который подключает javascript код Geetest v4 на странице (на антикапче этот параметр приравнивается к gt, по сути меняться не должен)</param>
         /// <param name="pageUrl">Адрес целевой страницы. Может находиться в любом месте сайта, в том числе в закрытом для подписчиков разделе. Наши работники не посещают сайт, а вместо этого эмулируют посещение страницы.</param>
         /// <param name="apiServer">Значение параметра api_server, найденное на сайте (Опциональный поддомен API. Может потребоваться для некоторых имплементаций)</param>
         /// <param name="geetestGetLib"></param>

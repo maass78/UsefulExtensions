@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Security.Cryptography;
 using UsefulExtensions.Security.Types;
 
@@ -29,20 +30,24 @@ namespace UsefulExtensions.Security
         /// </summary>
         /// <param name="value">Массив байтов, которые необходимо зашифровать</param>
         /// <returns>Зашифрованный массив байтов</returns>
+        [Obsolete("Obsolete")]
         public byte[] Encrypt(byte[] value)
         {
             byte[] encrypted;
-            using (T cipher = new T())
+            using(T cipher = new T())
             {
                 cipher.Mode = CipherMode.CBC;
-                PasswordDeriveBytes _passwordBytes = new PasswordDeriveBytes(Parameters.Password, Parameters.Salt, Parameters.HashAlgorithm.ToString(), Parameters.Iterations);
-                byte[] keyBytes = _passwordBytes.GetBytes(Parameters.KeySize / 8);
-
-                using (ICryptoTransform encryptor = cipher.CreateEncryptor(keyBytes, Parameters.IV))
+                byte[] keyBytes;
+                using(PasswordDeriveBytes _passwordBytes = new PasswordDeriveBytes(Parameters.Password, Parameters.Salt, Parameters.HashAlgorithm.ToString(), Parameters.Iterations))
                 {
-                    using (MemoryStream to = new MemoryStream())
+                    keyBytes = _passwordBytes.GetBytes(Parameters.KeySize / 8);
+                }
+
+                using(ICryptoTransform encryption = cipher.CreateEncryptor(keyBytes, Parameters.IV))
+                {
+                    using(MemoryStream to = new MemoryStream())
                     {
-                        using (CryptoStream writer = new CryptoStream(to, encryptor, CryptoStreamMode.Write))
+                        using(CryptoStream writer = new CryptoStream(to, encryption, CryptoStreamMode.Write))
                         {
                             writer.Write(value, 0, value.Length);
                             writer.FlushFinalBlock();
@@ -60,20 +65,24 @@ namespace UsefulExtensions.Security
         /// </summary>
         /// <param name="value">Массив зашифрованных байтов</param>
         /// <returns>Расшифрованный массив байтов</returns>
+        [Obsolete("Obsolete")]
         public byte[] Decrypt(byte[] value)
         {
             byte[] decrypted;
-            using (T cipher = new T())
+            using(T cipher = new T())
             {
                 cipher.Mode = CipherMode.CBC;
-                PasswordDeriveBytes _passwordBytes = new PasswordDeriveBytes(Parameters.Password, Parameters.Salt, Parameters.HashAlgorithm.ToString(), Parameters.Iterations);
-                byte[] keyBytes = _passwordBytes.GetBytes(Parameters.KeySize / 8);
-                
-                using (ICryptoTransform decryptor = cipher.CreateDecryptor(keyBytes, Parameters.IV))
+                byte[] keyBytes;
+                using(PasswordDeriveBytes _passwordBytes = new PasswordDeriveBytes(Parameters.Password, Parameters.Salt, Parameters.HashAlgorithm.ToString(), Parameters.Iterations))
                 {
-                    using (MemoryStream from = new MemoryStream(value))
+                    keyBytes = _passwordBytes.GetBytes(Parameters.KeySize / 8);
+                }
+
+                using(ICryptoTransform decryption = cipher.CreateDecryptor(keyBytes, Parameters.IV))
+                {
+                    using(MemoryStream from = new MemoryStream(value))
                     {
-                        using (CryptoStream reader = new CryptoStream(from, decryptor, CryptoStreamMode.Read))
+                        using(CryptoStream reader = new CryptoStream(from, decryption, CryptoStreamMode.Read))
                         {
                             decrypted = new byte[value.Length];
                             reader.Read(decrypted, 0, decrypted.Length);

@@ -1,5 +1,4 @@
-﻿using Leaf.xNet;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,15 +6,17 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Leaf.xNet;
 
 namespace UsefulExtensions
 {
     /// <summary>
-    /// Статический класс, предоставлющий методы, часто используемые в создании софта (чекеры, регеры и пр. софт для автоматизации действий на сайтах)
+    /// Статический класс, предоставляющий методы, часто используемые в создании софта (чекеры, регеры и пр. софт для автоматизации действий на сайтах)
     /// </summary>
     public static class Helper
     {
         #region time stamp
+
         /// <summary>
         /// Возвращает Unix TimeStamp Seconds
         /// </summary>
@@ -41,23 +42,26 @@ namespace UsefulExtensions
         /// <param name="dateTime">Время, timestamp которого необходимо получить</param>
         /// <returns>Количество миллисекунд, прошедших с 1 января 1970 г. Часовой пояс UTC</returns>
         public static long GetUnixMilliseconds(DateTime dateTime) => new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
-        #endregion
+
+        #endregion time stamp
 
         #region MD5 hash
+
         /// <summary>
-        /// Возращает MD5 хэш строки
+        /// Возвращает MD5 хэш строки
         /// </summary>
         /// <param name="value">Исходная строка, хэш которой необходимо получить</param>
         /// <returns>MD5 хэш исходной строки</returns>
         public static string GetMD5Hash(string value) => string.Concat(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(value)).Select(x => x.ToString("x2")));
 
         /// <summary>
-        /// Возращает MD5 хэш массива байтов
+        /// Возвращает MD5 хэш массива байтов
         /// </summary>
         /// <param name="value">Массив байтов, хэш которого необходимо получить</param>
         /// <returns>MD5 хэш исходного массива байтов</returns>
         public static string GetMD5Hash(byte[] value) => string.Concat(MD5.Create().ComputeHash(value).Select(x => x.ToString("x2")));
-        #endregion
+
+        #endregion MD5 hash
 
         public static List<List<T>> SplitToSublists<T>(this List<T> source, int count)
         {
@@ -69,71 +73,76 @@ namespace UsefulExtensions
         }
 
         #region accounts
+
         public static List<Account> ParseAccountsFromString(string value)
         {
             value = value.Replace("\r", string.Empty);
             string[] lines = value.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             List<Account> output = new List<Account>();
-            for (int i = 0; i < lines.Length; i++)
+            foreach(var line in lines)
             {
-                
-                if (!string.IsNullOrWhiteSpace(lines[i]))
+                if(!string.IsNullOrWhiteSpace(line))
                 {
                     string[] data;
-                    if (lines[i].Contains(":"))
-                        data = lines[i].Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-                    else if (lines[i].Contains(";"))
-                        data = lines[i].Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                    if(line.Contains(":"))
+                        data = line.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    else if(line.Contains(";"))
+                        data = line.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                     else
                         continue;
 
                     try
                     {
                         output.Add(new Account(data[0], data[1]));
+                    } catch
+                    {
+                        // ignored
                     }
-                    catch { }
                 }
             }
             return output;
         }
-        public static async Task<List<Account>> ParseAccountsFromStringAsync(string value) => await Task.Run(() => ParseAccountsFromString(value));
+
+        public static Task<List<Account>> ParseAccountsFromStringAsync(string value) => Task.Run(() => ParseAccountsFromString(value));
 
         public static List<Account> ParseAccountsFromFile(string fileName) => ParseAccountsFromString(File.ReadAllText(fileName));
+
         public static async Task<List<Account>> ParseAccountsFromFileAsync(string fileName) => await Task.Run(() => ParseAccountsFromFile(fileName));
-        #endregion
+
+        #endregion accounts
 
         #region proxies
+
         public static List<ProxyClient> ParseProxiesFromString(string value, ProxyType proxyType)
         {
-            List<ProxyClient> output = new List<ProxyClient>();
             value = value.Replace("\r", string.Empty);
             string[] lines = value.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < lines.Length; i++)
-            {
-                if (!string.IsNullOrWhiteSpace(lines[i]))
-                    output.Add(ProxyClient.Parse(proxyType, lines[i]));
-            }
-            return output;
+            return (from line in lines where !string.IsNullOrWhiteSpace(line) select ProxyClient.Parse(proxyType, line)).ToList();
         }
+
         public static async Task<List<ProxyClient>> ParseProxiesFromStringAsync(string value, ProxyType proxyType) => await Task.Run(() => ParseProxiesFromString(value, proxyType));
 
         public static List<ProxyClient> ParseProxiesFromFile(string fileName, ProxyType proxyType) => ParseProxiesFromString(File.ReadAllText(fileName), proxyType);
+
         public static async Task<List<ProxyClient>> ParseProxiesFromFileAsync(string fileName, ProxyType proxyType) => await Task.Run(() => ParseProxiesFromFile(fileName, proxyType));
 
         public static List<ProxyClient> ParseProxiesFromUrl(string url, ProxyType proxyType)
         {
             HttpRequest request = new HttpRequest();
             request.UserAgentRandomize();
-            
+
             string rawProxies = request.Get(url).ToString();
             request.Dispose();
 
-            return ParseProxiesFromString(rawProxies, proxyType); 
+            return ParseProxiesFromString(rawProxies, proxyType);
         }
+
         public static async Task<List<ProxyClient>> ParseProxiesFromUrlAsync(string url, ProxyType proxyType) => await Task.Run(() => ParseProxiesFromUrl(url, proxyType));
-        #endregion
+
+        #endregion proxies
 
         #region cookies
+
         public static CookieStorage ParseCookiesFromString(string value, bool considerExpires = false, bool considerSecure = false)
         {
             CookieStorage storage = new CookieStorage();
@@ -142,33 +151,37 @@ namespace UsefulExtensions
 
             string[] lines = value.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            for (int i = 0; i < lines.Length; i++)
+            foreach(var line in lines)
             {
                 try
                 {
-                    if (string.IsNullOrWhiteSpace(lines[i]))
+                    if(string.IsNullOrWhiteSpace(line))
                         continue;
 
-                    string[] data = lines[i].Split(new char[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] data = line.Split(new char[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
 
                     var cookie = new Cookie(data[5], data[6], data[2], data[0]);
 
-                    if (considerExpires)
+                    if(considerExpires)
                         cookie.Expires = DateTimeOffset.FromUnixTimeSeconds(long.Parse(data[4])).DateTime;
 
-                    if (considerSecure)
+                    if(considerSecure)
                         cookie.Secure = bool.Parse(data[3]);
 
                     storage.Add(cookie);
+                } catch
+                {
+                    // ignored
                 }
-                catch { }
             }
 
             return storage;
         }
+
         public static async Task<CookieStorage> ParseCookiesFromStringAsync(string value, bool considerExpires = false, bool considerSecure = false) => await Task.Run(() => ParseCookiesFromString(value, considerExpires, considerSecure));
 
         public static CookieStorage ParseCookiesFromFile(string fileName, bool considerExpires = false, bool considerSecure = false) => ParseCookiesFromString(File.ReadAllText(fileName), considerExpires, considerSecure);
+
         public static async Task<CookieStorage> ParseCookiesFromFileAsync(string fileName, bool considerExpires = false, bool considerSecure = false) => await Task.Run(() => ParseCookiesFromFile(fileName, considerExpires, considerSecure));
 
         public static List<CookieStorage> ParseCookiesFromFolder(string folderPath, bool considerExpires = false, bool considerSecure = false)
@@ -177,15 +190,17 @@ namespace UsefulExtensions
 
             string[] files = Directory.GetFiles(folderPath);
 
-            for (int i = 0; i < files.Length; i++)
+            foreach(var line in files)
             {
-                result.Add(ParseCookiesFromFile(files[i], considerExpires, considerSecure));
+                result.Add(ParseCookiesFromFile(line, considerExpires, considerSecure));
             }
 
             return result;
         }
+
         public static async Task<List<CookieStorage>> ParseCookiesFromFolderAsync(string folderPath, bool considerExpires = false, bool considerSecure = false) => await Task.Run(() => ParseCookiesFromFolder(folderPath, considerExpires, considerSecure));
-        #endregion
+
+        #endregion cookies
 
         /// <summary>
         /// Преобразует строку в массив байт, используя <see cref="Encoding.UTF8"/>
@@ -210,7 +225,7 @@ namespace UsefulExtensions
         {
             DirectoryInfo dir = new DirectoryInfo(sourceDirName);
 
-            if (!dir.Exists)
+            if(!dir.Exists)
             {
                 throw new DirectoryNotFoundException(
                     "Source directory does not exist or could not be found: "
@@ -220,15 +235,15 @@ namespace UsefulExtensions
             Directory.CreateDirectory(destDirName);
 
             FileInfo[] files = dir.GetFiles();
-            foreach (FileInfo file in files)
+            foreach(FileInfo file in files)
             {
                 string tempPath = Path.Combine(destDirName, file.Name);
                 file.CopyTo(tempPath, overwrite);
             }
 
-            if (copySubDirs)
+            if(copySubDirs)
             {
-                foreach (DirectoryInfo subdir in dirs)
+                foreach(DirectoryInfo subdir in dirs)
                 {
                     string tempPath = Path.Combine(destDirName, subdir.Name);
                     CopyDirectory(subdir.FullName, tempPath, copySubDirs);

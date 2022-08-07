@@ -19,15 +19,15 @@ namespace UsefulExtensions
             int random = _random.Next(99) + 1;
 
             // Windows 10 = 45% popularity
-            if (random >= 1 && random <= 45)
+            if(random >= 1 && random <= 45)
                 windowsVersion += "10.0";
 
             // Windows 7 = 35% popularity
-            else if (random > 45 && random <= 80)
+            else if(random > 45 && random <= 80)
                 windowsVersion += "6.1";
 
             // Windows 8.1 = 15% popularity
-            else if (random > 80 && random <= 95)
+            else if(random > 80 && random <= 95)
                 windowsVersion += "6.3";
 
             // Windows 8 = 5% popularity
@@ -35,7 +35,7 @@ namespace UsefulExtensions
                 windowsVersion += "6.2";
 
             // Append WOW64 for X64 system
-            if (_random.NextDouble() <= 0.65)
+            if(_random.NextDouble() <= 0.65)
                 windowsVersion += _random.NextDouble() <= 0.5 ? "; WOW64" : "; Win64; x64";
 
             return windowsVersion;
@@ -55,7 +55,7 @@ namespace UsefulExtensions
                 $"Chrome/{major}.0.{build}.{branchBuild} Safari/537.36";
         }
 
-        private static readonly byte[] FirefoxVersions = { 89, 91, 99, 98, 97, 96, 95, 94, 93, 92, 100  };
+        private static readonly byte[] FirefoxVersions = { 89, 91, 99, 98, 97, 96, 95, 94, 93, 92, 100 };
 
         /// <summary>
         /// Генерирует случайный User-Agent от браузера Firefox.
@@ -69,6 +69,20 @@ namespace UsefulExtensions
         }
 
         /// <summary>
+        /// Генерирует случайный User-Agent от Apple iPhone.
+        /// </summary>
+        /// <returns>Случайный User-Agent от  Apple iPhone.</returns>
+        public static string GenerateMobileUserAgent()
+        {
+            int major = _random.Next(10, 13);
+            int build = _random.Next(1, 3);
+            int branchBuild = build + 2;
+
+            return $"Mozilla/5.0 ({GenerateRandomWindowsVersion()}) AppleWebKit/605.1.15 (KHTML, like Gecko) " +
+                   $"Version/{major}.1.{build} Mobile/{branchBuild}E148 Safari/604.1";
+        }
+
+        /// <summary>
         /// Возвращает случайный User-Agent Chrome / Firefox / Opera, основываясь на их популярности.
         /// </summary>
         /// <returns>Строка-значение заголовка User-Agent</returns>
@@ -79,10 +93,14 @@ namespace UsefulExtensions
             // TODO: edge, yandex browser, safari
 
             // Chrome = 70%
-            if (rand >= 1 && rand <= 70)
+            if(rand >= 1 && rand <= 70)
                 return GenerateChromeUserAgent();
 
-            return GenerateFirefoxUserAgent();
+            // Apple iPhone = 25% popularity
+            else if(rand >= 55 && rand <= 80)
+                return GenerateMobileUserAgent();
+            else
+                return GenerateFirefoxUserAgent();
         }
     }
 }

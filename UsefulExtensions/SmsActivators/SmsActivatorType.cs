@@ -11,18 +11,22 @@ namespace UsefulExtensions.SmsActivators
         /// https://smshub.org/
         /// </summary>
         SmsHub,
+
         /// <summary>
         /// https://sms-activate.ru/
         /// </summary>
         SmsActivateRu,
+
         /// <summary>
         /// https://5sim.net/
         /// </summary>
         Sim5,
+
         /// <summary>
         /// https://vak-sms.com/
         /// </summary>
         VakSmsCom,
+
         /// <summary>
         /// https://onlinesim.ru/
         /// </summary>
@@ -42,13 +46,13 @@ namespace UsefulExtensions.SmsActivators
         /// <returns>Одна из стандартных реализаций интерфейса <see cref="ISmsActivator"/> в зависимости от указанного типа</returns>
         public static ISmsActivator GetSmsActivatorByType(this SmsActivatorType type, string apiKey)
         {
-            if (type == SmsActivatorType.SmsHub)
+            if(type == SmsActivatorType.SmsHub)
                 return new SmsHubActivator(apiKey);
-            else if (type == SmsActivatorType.SmsActivateRu)
+            else if(type == SmsActivatorType.SmsActivateRu)
                 return new SmsActivateRuActivator(apiKey);
-            else if (type == SmsActivatorType.Sim5)
+            else if(type == SmsActivatorType.Sim5)
                 return new Sim5Activator(apiKey);
-            else if (type == SmsActivatorType.OnlineSim)
+            else if(type == SmsActivatorType.OnlineSim)
                 return new OnlineSimActivator(apiKey);
             else
                 return new VakSmsComActivator(apiKey);

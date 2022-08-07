@@ -57,5 +57,5 @@ namespace UsefulExtensions.Security
         /// <param name="value">Массив зашифрованных байтов</param>
         /// <returns>Расшифрованный массив байтов</returns>
         public byte[] Decrypt(byte[] value) => RSA.Decrypt(value, false);
-    } 
+    }
 }
