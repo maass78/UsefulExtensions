@@ -76,7 +76,7 @@ namespace UsefulExtensions.SmsActivators
 			if (@operator != null)
 				@params.Add(GetParam("operator", @operator));
 
-			string response = request.Post(ApiUrl, new FormUrlEncodedContent(@params)).ToString();
+			string response = request.Get(ApiUrl, @params).ToString();
 
 			if (CheckForExceptions(response, out Exception ex))
 				throw ex;
@@ -107,7 +107,7 @@ namespace UsefulExtensions.SmsActivators
 				{ GetParam("api_key", ApiKey) },
 				{ GetParam("id", id.ToString()) },
 			};
-			string response = request.Post(ApiUrl, new FormUrlEncodedContent(@params)).ToString();
+			string response = request.Get(ApiUrl, @params).ToString();
 
 			if (CheckForExceptions(response, out Exception ex))
 				throw ex;
@@ -154,7 +154,7 @@ namespace UsefulExtensions.SmsActivators
 				{ GetParam("status", ((int)status).ToString()) }
 			};
 
-			string response = request.Post(ApiUrl, new FormUrlEncodedContent(@params)).ToString();
+			string response = request.Get(ApiUrl, @params).ToString();
 
 			if (CheckForExceptions(response, out Exception ex))
 				throw ex;
