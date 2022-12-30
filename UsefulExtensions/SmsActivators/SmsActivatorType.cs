@@ -26,7 +26,11 @@ namespace UsefulExtensions.SmsActivators
         /// <summary>
         /// https://onlinesim.ru/
         /// </summary>
-        OnlineSim
+        OnlineSim,
+        /// <summary>
+        /// https://sms-actiwator.ru/
+        /// </summary>
+        SmsActiwator
     }
 
     /// <summary>
@@ -50,6 +54,8 @@ namespace UsefulExtensions.SmsActivators
                 return new Sim5Activator(apiKey);
             else if (type == SmsActivatorType.OnlineSim)
                 return new OnlineSimActivator(apiKey);
+            else if (type == SmsActivatorType.SmsActiwator)
+                return new SmsActiwatorActivator(apiKey);
             else
                 return new VakSmsComActivator(apiKey);
         }

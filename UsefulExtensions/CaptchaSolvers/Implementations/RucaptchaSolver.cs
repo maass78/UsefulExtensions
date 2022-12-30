@@ -41,7 +41,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                            $"&method=funcaptcha" +
                            $"&publickey={publicKey}" +
                            $"&surl={surl}" +
-                           $"&pageurl={pageUrl}" +
+                           $"&pageurl={System.Web.HttpUtility.UrlEncode(pageUrl)}" +
                            $"&json=1";
 
             return GetAnswer(inUrl);
@@ -90,7 +90,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                            $"key={Key}" +
                            $"&method=userrecaptcha" +
                            $"&googlekey={siteKey}" +
-                           $"&pageurl={pageUrl}" +
+                           $"&pageurl={System.Web.HttpUtility.UrlEncode(pageUrl)}" +
                            $"&invisible={(invisible ? "1" : "0")}" +
                            $"&json=1";
 
@@ -179,7 +179,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                            $"key={Key}" +
                            $"&method=hcaptcha" +
                            $"&sitekey={siteKey}" +
-                           $"&pageurl={pageUrl}" +
+                           $"&pageurl={System.Web.HttpUtility.UrlEncode(pageUrl)}" +
                            $"&invisible={(invisible ? "1" : "0")}" +
                            $"&json=1";
 
@@ -195,7 +195,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                     $"key={Key}" +
                     $"&method=geetest" +
                     $"&gt={gt}" +
-                    $"&pageurl={pageUrl}" +
+                    $"&pageurl={System.Web.HttpUtility.UrlEncode(pageUrl)}" +
                     $"&challenge={challenge}" +
                     $"&json=1";
 
@@ -211,7 +211,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                   $"key={Key}" +
                   $"&method=geetest_v4 " +
                   $"&captcha_id={captchaId}" +
-                  $"&pageurl={pageUrl}" +
+                  $"&pageurl={System.Web.HttpUtility.UrlEncode(pageUrl)}" +
                   $"&json=1";
 
             if (apiServer != null)
