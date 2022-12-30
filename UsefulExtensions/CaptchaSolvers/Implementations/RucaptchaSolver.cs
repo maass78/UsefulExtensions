@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.Threading;
 using System;
 using UsefulExtensions.CaptchaSolvers.Models;
+using System.Globalization;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations
 {
@@ -25,6 +26,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public ProxyClient Proxy { get; set; }
 
         public TimeSpan SolveDelay { get => _delay; set => _delay = value; }
+        public TimeSpan RequestTimeout { get; set; }
 
         public RucaptchaSolver(string key, string url = "http://rucaptcha.com")
         {
@@ -49,6 +51,9 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         {
             using (HttpRequest request = new HttpRequest())
             {
+                request.ReadWriteTimeout = request.KeepAliveTimeout
+                   = request.ConnectTimeout = (int)RequestTimeout.TotalMilliseconds;
+
                 if (Proxy != null)
                     request.Proxy = Proxy;
 
@@ -88,6 +93,82 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                            $"&pageurl={pageUrl}" +
                            $"&invisible={(invisible ? "1" : "0")}" +
                            $"&json=1";
+
+            return GetAnswer(inUrl);
+        }
+
+        public string SolveRecaptchaV2Enterprise(string siteKey, string pageUrl)
+        {
+            string inUrl = $"{Url}/in.php?" +
+                        $"key={Key}" +
+                        $"&method=userrecaptcha" +
+                        $"&version=v2" +
+                        $"&googlekey={siteKey}" +
+                        $"&pageurl={pageUrl}" +
+                        $"&enterprise=1" +
+                        $"&json=1";
+
+            return GetAnswer(inUrl);
+        }
+
+        public string SolveRecaptchaV3(string siteKey, string pageUrl, string action = null, string domain = null, double minScore = 0.3)
+        {
+            string inUrl = $"{Url}/in.php?" +
+                       $"key={Key}" +
+                       $"&method=userrecaptcha" +
+                       $"&version=v3" +
+                       $"&googlekey={siteKey}" +
+                       $"&pageurl={pageUrl}" +
+                       $"&domain={domain}" +
+                       $"&min_score={minScore.ToString(CultureInfo.InvariantCulture)}" +
+                       $"&json=1";
+
+            if (action != null)
+                inUrl += $"&action={action}";
+
+            return GetAnswer(inUrl);
+        }
+
+        public string SolveRecaptchaV3Enterprise(string siteKey, string pageUrl, string action = null, string domain = null, double minScore = 0.3)
+        {
+            string inUrl = $"{Url}/in.php?" +
+                          $"key={Key}" +
+                          $"&method=userrecaptcha" +
+                          $"&version=v3" +
+                          $"&googlekey={siteKey}" +
+                          $"&pageurl={pageUrl}" +
+                          $"&enterprise=1" +
+                          $"&domain={domain}" +
+                          $"&min_score={minScore.ToString(CultureInfo.InvariantCulture)}" +
+                          $"&json=1";
+
+            if (action != null)
+                inUrl += $"&action={action}";
+
+            return GetAnswer(inUrl);
+        }
+
+        public string SolveRecaptchaV3EnterpriseProxy(string siteKey, string pageUrl, string action = null, string domain = null, double minScore = 0.3, string proxy = null, string proxyType = null)
+        {
+            string inUrl = $"{Url}/in.php?" +
+                          $"key={Key}" +
+                          $"&method=userrecaptcha" +
+                          $"&version=v3" +
+                          $"&googlekey={siteKey}" +
+                          $"&pageurl={pageUrl}" +
+                          $"&enterprise=1" +
+                          $"&domain={domain}" +
+                          $"&min_score={minScore.ToString(CultureInfo.InvariantCulture)}" +
+                          $"&json=1";
+
+            if (action != null)
+                inUrl += $"&action={action}";
+
+            if (proxy != null)
+                inUrl += $"&action={action}";
+
+            if (proxyType != null)
+                proxyType += $"&action={action}";
 
             return GetAnswer(inUrl);
         }

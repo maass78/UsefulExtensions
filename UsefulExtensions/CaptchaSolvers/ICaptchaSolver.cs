@@ -24,6 +24,36 @@ namespace UsefulExtensions.CaptchaSolvers
         string SolveRecaptchaV2(string siteKey, string pageUrl, bool invisible);
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="siteKey"></param>
+        /// <param name="pageUrl"></param>
+        /// <returns></returns>
+        string SolveRecaptchaV2Enterprise(string siteKey, string pageUrl);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="siteKey"></param>
+        /// <param name="pageUrl"></param>
+        /// <param name="action"></param>
+        /// <param name="domain"></param>
+        /// <param name="minScore"></param>
+        /// <returns></returns>
+        string SolveRecaptchaV3(string siteKey, string pageUrl, string action = null, string domain = null, double minScore = 0.3);
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="siteKey"></param>
+        /// <param name="pageUrl"></param>
+        /// <param name="action"></param>
+        /// <param name="domain"></param>
+        /// <param name="minScore"></param>
+        /// <returns></returns>
+        string SolveRecaptchaV3Enterprise(string siteKey, string pageUrl, string action = null, string domain = null, double minScore = 0.3);
+
+        /// <summary>
         /// Решение Arkose Labs FunCaptcha с помощью токена
         /// </summary>
         /// <param name="publicKey">Значение параметра pk или data-pkey которое вы нашли в коде страницы</param>
@@ -88,6 +118,11 @@ namespace UsefulExtensions.CaptchaSolvers
         /// Задержка между проверками на решение (по умолчанию равна 5 сек)
         /// </summary>
         TimeSpan SolveDelay { get; set; }
+
+        /// <summary>
+        /// Таймаут для запросов к сервису решения капчи (по умолчанию - 60 сек.)
+        /// </summary>
+        TimeSpan RequestTimeout { get; set; }
     }
 
     public delegate void OnLogMessageHandler(object sender, OnLogMessageEventArgs eventArgs);

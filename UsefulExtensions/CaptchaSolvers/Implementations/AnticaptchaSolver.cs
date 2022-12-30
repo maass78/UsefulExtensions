@@ -5,6 +5,8 @@ using System.Threading;
 using System;
 using UsefulExtensions.CaptchaSolvers.Models;
 using System.Collections.Generic;
+using UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha;
+using System.Linq;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations
 {
@@ -23,6 +25,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
         private TimeSpan _delay = TimeSpan.FromSeconds(5);
         public TimeSpan SolveDelay { get => _delay; set => _delay = value; }
+        public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromMinutes(1);
 
         public AnticaptchaSolver(string key)
         {
@@ -45,6 +48,9 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         {
             using (HttpRequest request = new HttpRequest())
             {
+                request.ReadWriteTimeout = request.KeepAliveTimeout 
+                    = request.ConnectTimeout = (int)RequestTimeout.TotalMilliseconds;
+
                 if (Proxy != null)
                     request.Proxy = Proxy;
 
@@ -95,7 +101,49 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                 IsInvisible = invisible
             };
 
-            return GetTaskResult<RecaptchaV2Solution, RecaptchaV2Task>(task).GRecaptchaResponse;
+            return GetTaskResult<RecaptchaV2, RecaptchaV2Task>(task).GRecaptchaResponse;
+        }
+
+        public string SolveRecaptchaV2Enterprise(string siteKey, string pageUrl)
+        {
+            var task = new RecaptchaV2EnterpriseTask()
+            {
+                WebsiteKey = siteKey,
+                WebsiteURL = pageUrl,
+                EnterprisePayload = null
+            };
+
+            return GetTaskResult<RecaptchaV2, RecaptchaV2EnterpriseTask>(task).GRecaptchaResponse;
+        }
+
+        public string SolveRecaptchaV3(string siteKey, string pageUrl, string action = null, string domain = null, double minScore = 0.3)
+        {
+            var task = new RecaptchaV3Task()
+            {
+                IsEnterprise = false,
+                MinScore = minScore,
+                PageAction = action,
+                WebsiteKey = siteKey,
+                WebsiteURL = pageUrl,
+                ApiDomain = domain
+            };
+
+            return GetTaskResult<RecaptchaV2, RecaptchaV3Task>(task).GRecaptchaResponse;
+        }
+
+        public string SolveRecaptchaV3Enterprise(string siteKey, string pageUrl, string action = null, string domain = null, double minScore = 0.3)
+        {
+            var task = new RecaptchaV3Task()
+            {
+                IsEnterprise = true,
+                PageAction = action,
+                WebsiteKey = siteKey,
+                WebsiteURL = pageUrl,
+                MinScore = minScore,
+                ApiDomain = domain
+            };
+
+            return GetTaskResult<RecaptchaV2, RecaptchaV3Task>(task).GRecaptchaResponse;
         }
 
         public string SolveHCaptcha(string siteKey, string pageUrl, bool invisible = false, string additionalData = null)
@@ -106,7 +154,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                 WebsiteURL = pageUrl
             };
 
-            return GetTaskResult<RecaptchaV2Solution, HCaptchaTask>(task).GRecaptchaResponse;
+            return GetTaskResult<RecaptchaV2, HCaptchaTask>(task).GRecaptchaResponse;
         }
 
         public GeeTestV3CaptchaResult SolveGeeTestV3Captcha(string gt, string challenge, string pageUrl, string apiServer = null)
@@ -184,7 +232,10 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
 
             return GetTaskResult<CustomSolution, CustomTask<T>>(task);
         }
+
     }
+
+   
 
     class AnticaptchaСreateTaskRequest<T>
     {
@@ -250,183 +301,5 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public string SolveCount { get; set; }
     }
 
-    class RecaptchaV2Solution
-    {
-        [JsonProperty("gRecaptchaResponse")]
-        public string GRecaptchaResponse { get; set; }
-    }
-    class ArkoseCaptchaSolution
-    {
-        [JsonProperty("token")]
-        public string Token { get; set; }
-    }
-
-    class GeeTestV3Solution
-    {
-        [JsonProperty("challenge")]
-        public string Challenge { get; set; }
-
-        [JsonProperty("validate")]
-        public string Validate { get; set; }
-
-        [JsonProperty("seccode")]
-        public string Seccode { get; set; }
-    }
-
-    class GeeTestV4Solution
-    {
-        [JsonProperty("captcha_id")]
-        public string CaptchaId { get; set; }
-
-        [JsonProperty("lot_number")]
-        public string LotNumber { get; set; }
-
-        [JsonProperty("pass_token")]
-        public string PassToken { get; set; }
-
-        [JsonProperty("gen_time")]
-        public int GenTime { get; set; }
-
-        [JsonProperty("captcha_output")]
-        public string CaptchaOutput { get; set; }
-    }
-
-    class AnticaptchaTask
-    {
-        [JsonProperty("type")]
-        public string Type { get; set; }
-
-        public AnticaptchaTask(string type)
-        {
-            Type = type;
-        }
-    }
-
-    class RecaptchaV2Task : AnticaptchaTask
-    {
-        public RecaptchaV2Task() : base("RecaptchaV2TaskProxyless") { }
-
-        [JsonProperty("websiteURL")]
-        public string WebsiteURL { get; set; }
-
-        [JsonProperty("websiteKey")]
-        public string WebsiteKey { get; set; }
-
-        [JsonProperty("isInvisible")]
-        public bool IsInvisible { get; set; }
-    }
-    class ArkoseCaptchaTask : AnticaptchaTask
-    {
-        public ArkoseCaptchaTask() : base("FunCaptchaTaskProxyless") { }
-
-        [JsonProperty("websiteURL")]
-        public string WebsiteURL { get; set; }
-
-        [JsonProperty("funcaptchaApiJSSubdomain")]
-        public string FuncaptchaApiJSSubdomain { get; set; }
-
-        [JsonProperty("data")]
-        public string Data { get; set; }
-
-        [JsonProperty("websitePublicKey")]
-        public string WebsitePublicKey { get; set; }
-    }
-    class HCaptchaTask : AnticaptchaTask
-    {
-        public HCaptchaTask() : base("HCaptchaTaskProxyless") { }
-
-        [JsonProperty("websiteURL")]
-        public string WebsiteURL { get; set; }
-
-        [JsonProperty("websiteKey")]
-        public string WebsiteKey { get; set; }
-    }
-    class GeeTestTask : AnticaptchaTask
-    {
-        public GeeTestTask() : base("GeeTestTaskProxyless") { }
-
-        [JsonProperty("websiteURL")]
-        public string WebsiteURL { get; set; }
-
-        [JsonProperty("gt")]
-        public string Gt { get; set; }
-
-        [JsonProperty("challenge")]
-        public string Challenge { get; set; }
-
-        [JsonProperty("version")]
-        public int Version { get; set; }
-
-        [JsonProperty("geetestApiServerSubdomain")]
-        public string GeetestApiServerSubdomain { get; set; }
-
-        [JsonProperty("geetestGetLib")]
-        public string GeetestGetLib { get; set; }
-
-        [JsonProperty("initParameters")]
-        public object InitParameters { get; set; }
-    }
-
-
-    class CustomTask<T> : AnticaptchaTask
-    {
-        public CustomTask() : base("AntiGateTask") { }
-
-        [JsonProperty("websiteURL")]
-        public string WebsiteURL { get; set; }
-
-        [JsonProperty("templateName")]
-        public string TemplateName { get; set; }
-
-        [JsonProperty("variables")]
-        public T Variables { get; set; }
-
-        [JsonProperty("proxyAddress")]
-        public string ProxyAddress { get; set; }
-
-        [JsonProperty("proxyPort")]
-        public int? ProxyPort { get; set; }
-
-        [JsonProperty("proxyLogin")]
-        public string ProxyLogin { get; set; }
-
-        [JsonProperty("proxyPassword")]
-        public string ProxyPassword { get; set; }
-
-        [JsonProperty("domainsOfInterest")]
-        public List<string> DomainsOfInterest { get; set; }
-    }
-
-    public class CustomSolution
-    {
-        [JsonProperty("cookies")]
-        public object Cookies { get; set; }
-
-        [JsonProperty("localStorage")]
-        public object LocalStorage { get; set; }
-
-        [JsonProperty("fingerprint")]
-        public object Fingerprint { get; set; }
-
-        [JsonProperty("url")]
-        public string Url { get; set; }
-
-        [JsonProperty("domain")]
-        public string Domain { get; set; }
-
-        [JsonProperty("domainsOfInterest")]
-        public object DomainsOfInterest { get; set; }
-        
-        public class DomainOfInterest
-        {
-            [JsonProperty("cookies")]
-            public Dictionary<string, string> Cookies { get; set; }
-
-            [JsonProperty("localStorage")]
-            public Dictionary<string, object> LocalStorage { get; set; }
-
-            [JsonProperty("fingerprint")]
-            public Dictionary<string, object> Fingerprint { get; set; }
-        }
-    }
+   
 }
