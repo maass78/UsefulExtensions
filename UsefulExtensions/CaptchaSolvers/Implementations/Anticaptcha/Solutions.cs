@@ -3,10 +3,19 @@ using System.Collections.Generic;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha
 {
-    internal class RecaptchaV2
+    internal class RecaptchaV2Solution
     {
         [JsonProperty("gRecaptchaResponse")]
         public string GRecaptchaResponse { get; set; }
+    }
+
+    internal class TextSolution
+    {
+        [JsonProperty("text")]
+        public string Text { get; set; }
+
+        [JsonProperty("url")]
+        public string Url { get; set; }
     }
 
     internal class ArkoseCaptchaSolution

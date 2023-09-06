@@ -111,7 +111,38 @@ namespace UsefulExtensions
             for (int i = 0; i < lines.Length; i++)
             {
                 if (!string.IsNullOrWhiteSpace(lines[i]))
-                    output.Add(ProxyClient.Parse(proxyType, lines[i]));
+                {
+                    var data = lines[i].Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    if (data.Length == 4 && IPAddress.TryParse(data[2], out IPAddress iPAddress))
+                    {
+                        ProxyClient proxy;
+
+                        if (proxyType == ProxyType.HTTP)
+                        {
+                            proxy = new HttpProxyClient(data[2], int.Parse(data[3]), data[0], data[1]);
+                        }
+                        else if (proxyType == ProxyType.Socks5)
+                        {
+                            proxy = new Socks5ProxyClient(data[2], int.Parse(data[3]), data[0], data[1]);
+                        }
+                        else if (proxyType == ProxyType.Socks4)
+                        {
+                            proxy = new Socks4ProxyClient(data[2], int.Parse(data[3]), data[0]);
+                        }
+                        else 
+                        {
+                            proxy = new Socks4AProxyClient(data[2], int.Parse(data[3]), data[0]);
+                        }
+
+                        output.Add(proxy);
+                    }
+                    else
+                    {
+                        output.Add(ProxyClient.Parse(proxyType, lines[i]));
+                    }
+
+                }
             }
             return output;
         }

@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/maass78/UsefulExtensions</RepositoryUrl>
     <PackageProjectUrl>https://github.com/maass78/UsefulExtensions</PackageProjectUrl>
     <NeutralLanguage>ru</NeutralLanguage>
-    <Version>1.1.4</Version>
+    <Version>1.1.5</Version>
     <DebugType>portable</DebugType>
   </PropertyGroup>
 

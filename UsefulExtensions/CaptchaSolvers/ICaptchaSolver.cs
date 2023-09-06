@@ -10,6 +10,20 @@ namespace UsefulExtensions.CaptchaSolvers
     public interface ICaptchaSolver
     {
         /// <summary>
+        /// Решает текстовую капчу
+        /// </summary>
+        /// <param name="base64image">Изображение, закодированное в base64 (без всяких префиксов по типу "data:image/png")</param>
+        /// <param name="phrase">Если <see langword="true"/>, то должны быть пробелы в капчи</param>
+        /// <param name="regsense">Если <see langword="true"/>, то капча должна быть чувствительна к регистру</param>
+        /// <param name="math">Если <see langword="true"/>, то капча должна содержать математическое выражение</param>
+        /// <param name="numeric">Что должно встречаться в капче. Или без разницы, или только цифры, или только буквы</param>
+        /// <param name="minLength">Минимальная длина. 0 - без ограничений</param>
+        /// <param name="maxLength">Максимальная длина. 0 - без ограничений</param>
+        /// <param name="instruction">Текстовая инструкция для работника</param>
+        /// <returns>Текст решенной капчи</returns>
+        string SolveTextCaptcha(string base64image, bool phrase = false, bool regsense = false, bool math = false, Numeric numeric = Numeric.None, int minLength = 0, int maxLength = 0, string instruction = null);
+
+        /// <summary>
         /// Решение reCAPTCHA V2, также известной как "Я не робот" reCAPTCHA
         /// </summary>
         /// <param name="siteKey">Значение параметра k или data-sitekey, которое вы нашли в коде страницы</param>

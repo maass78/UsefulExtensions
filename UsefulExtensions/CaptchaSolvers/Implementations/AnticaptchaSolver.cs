@@ -32,6 +32,22 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             Key = key;
         }
 
+        public string SolveTextCaptcha(string base64image, bool phrase = false, bool regsense = false, bool math = false, Numeric numeric = Numeric.None, int minLength = 0, int maxLength = 0, string instruction = null)
+        {
+            var task = new TextTask()
+            {
+                Body = base64image,
+                Phrase = phrase,
+                Case = regsense,
+                Math = math,
+                MinLength = minLength,
+                MaxLength = maxLength,
+                Numeric = (int)numeric,
+            };
+
+            return GetTaskResult<TextSolution, TextTask>(task).Text;
+        }
+
         public string SolveArkoseCaptcha(string publicKey, string surl, string pageUrl)
         {
             var task = new ArkoseCaptchaTask()
@@ -44,54 +60,6 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             return GetTaskResult<ArkoseCaptchaSolution, ArkoseCaptchaTask>(task).Token;
         }
 
-        private T GetTaskResult<T, Y>(Y task) where Y : AnticaptchaTask
-        {
-            using (HttpRequest request = new HttpRequest())
-            {
-                request.ReadWriteTimeout = request.KeepAliveTimeout 
-                    = request.ConnectTimeout = (int)RequestTimeout.TotalMilliseconds;
-
-                if (Proxy != null)
-                    request.Proxy = Proxy;
-
-                request.AddHeader("Content-Type", "application/json");
-
-                var createTaskRequest = new AnticaptchaСreateTaskRequest<Y>()
-                {
-                    ClientKey = Key,
-                    Task = task
-                };
-
-                var inResponse = JsonConvert.DeserializeObject<AnticaptchaCreateTaskResult>(
-                    request.Post("http://api.anti-captcha.com/createTask",
-                    new StringContent(JsonConvert.SerializeObject(createTaskRequest, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore } ))).ToString());
-
-                if (inResponse.ErrorId != 0)
-                    throw new CaptchaSolvingException(inResponse.ErrorId, this, $"Captcha error: {inResponse.ErrorCode} ({inResponse.ErrorDescription}) ID: {inResponse.ErrorId}");
-
-                OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.TaskId}"));
-
-                var taskResult = new AnticaptchaGetTaskResult<T>();
-                while (taskResult.Status != CAPTCHA_READY)
-                {
-                    Thread.Sleep(_delay);
-
-                    request.AddHeader("Content-Type", "application/json");
-
-                    string getSolution = JsonConvert.SerializeObject(new AnticaptchaGetTaskRequest() { ClientKey = Key, TaskId = inResponse.TaskId });
-
-                    taskResult = JsonConvert.DeserializeObject<AnticaptchaGetTaskResult<T>>(request.Post("https://api.anti-captcha.com/getTaskResult", new StringContent(getSolution)).ToString());
-                    
-                    if (taskResult.ErrorId != 0)
-                        throw new CaptchaSolvingException(taskResult.ErrorId, this, $"Captcha error: {taskResult.ErrorCode} ({taskResult.ErrorDescription}) ID: {taskResult.ErrorId}");
-
-                    OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha status: {taskResult.Status}"));
-                }
-
-                return taskResult.Solution;
-            }
-        }
-
         public string SolveRecaptchaV2(string siteKey, string pageUrl, bool invisible)
         {
             var task = new RecaptchaV2Task()
@@ -101,7 +69,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                 IsInvisible = invisible
             };
 
-            return GetTaskResult<RecaptchaV2, RecaptchaV2Task>(task).GRecaptchaResponse;
+            return GetTaskResult<RecaptchaV2Solution, RecaptchaV2Task>(task).GRecaptchaResponse;
         }
 
         public string SolveRecaptchaV2Enterprise(string siteKey, string pageUrl)
@@ -113,7 +81,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                 EnterprisePayload = null
             };
 
-            return GetTaskResult<RecaptchaV2, RecaptchaV2EnterpriseTask>(task).GRecaptchaResponse;
+            return GetTaskResult<RecaptchaV2Solution, RecaptchaV2EnterpriseTask>(task).GRecaptchaResponse;
         }
 
         public string SolveRecaptchaV3(string siteKey, string pageUrl, string action = null, string domain = null, double minScore = 0.3)
@@ -128,7 +96,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                 ApiDomain = domain
             };
 
-            return GetTaskResult<RecaptchaV2, RecaptchaV3Task>(task).GRecaptchaResponse;
+            return GetTaskResult<RecaptchaV2Solution, RecaptchaV3Task>(task).GRecaptchaResponse;
         }
 
         public string SolveRecaptchaV3Enterprise(string siteKey, string pageUrl, string action = null, string domain = null, double minScore = 0.3)
@@ -143,7 +111,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                 ApiDomain = domain
             };
 
-            return GetTaskResult<RecaptchaV2, RecaptchaV3Task>(task).GRecaptchaResponse;
+            return GetTaskResult<RecaptchaV2Solution, RecaptchaV3Task>(task).GRecaptchaResponse;
         }
 
         public string SolveHCaptcha(string siteKey, string pageUrl, bool invisible = false, string additionalData = null)
@@ -154,7 +122,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                 WebsiteURL = pageUrl
             };
 
-            return GetTaskResult<RecaptchaV2, HCaptchaTask>(task).GRecaptchaResponse;
+            return GetTaskResult<RecaptchaV2Solution, HCaptchaTask>(task).GRecaptchaResponse;
         }
 
         public GeeTestV3CaptchaResult SolveGeeTestV3Captcha(string gt, string challenge, string pageUrl, string apiServer = null)
@@ -231,6 +199,54 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             };
 
             return GetTaskResult<CustomSolution, CustomTask<T>>(task);
+        }
+
+        private T GetTaskResult<T, Y>(Y task) where Y : AnticaptchaTask
+        {
+            using (HttpRequest request = new HttpRequest())
+            {
+                request.ReadWriteTimeout = request.KeepAliveTimeout
+                    = request.ConnectTimeout = (int)RequestTimeout.TotalMilliseconds;
+
+                if (Proxy != null)
+                    request.Proxy = Proxy;
+
+                request.AddHeader("Content-Type", "application/json");
+
+                var createTaskRequest = new AnticaptchaСreateTaskRequest<Y>()
+                {
+                    ClientKey = Key,
+                    Task = task
+                };
+
+                var inResponse = JsonConvert.DeserializeObject<AnticaptchaCreateTaskResult>(
+                    request.Post("http://api.anti-captcha.com/createTask",
+                    new StringContent(JsonConvert.SerializeObject(createTaskRequest, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore }))).ToString());
+
+                if (inResponse.ErrorId != 0)
+                    throw new CaptchaSolvingException(inResponse.ErrorId, this, $"Captcha error: {inResponse.ErrorCode} ({inResponse.ErrorDescription}) ID: {inResponse.ErrorId}");
+
+                OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.TaskId}"));
+
+                var taskResult = new AnticaptchaGetTaskResult<T>();
+                while (taskResult.Status != CAPTCHA_READY)
+                {
+                    Thread.Sleep(_delay);
+
+                    request.AddHeader("Content-Type", "application/json");
+
+                    string getSolution = JsonConvert.SerializeObject(new AnticaptchaGetTaskRequest() { ClientKey = Key, TaskId = inResponse.TaskId });
+
+                    taskResult = JsonConvert.DeserializeObject<AnticaptchaGetTaskResult<T>>(request.Post("https://api.anti-captcha.com/getTaskResult", new StringContent(getSolution)).ToString());
+
+                    if (taskResult.ErrorId != 0)
+                        throw new CaptchaSolvingException(taskResult.ErrorId, this, $"Captcha error: {taskResult.ErrorCode} ({taskResult.ErrorDescription}) ID: {taskResult.ErrorId}");
+
+                    OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha status: {taskResult.Status}"));
+                }
+
+                return taskResult.Solution;
+            }
         }
 
     }

@@ -148,4 +148,30 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha
         [JsonProperty("domainsOfInterest")]
         public List<string> DomainsOfInterest { get; set; }
     }
+
+    internal class TextTask : AnticaptchaTask
+    {
+        public TextTask() : base("ImageToTextTask") { }
+
+        [JsonProperty("body")]
+        public string Body { get; set; }
+
+        [JsonProperty("phrase")]
+        public bool Phrase { get; set; }
+
+        [JsonProperty("case")]
+        public bool Case { get; set; }
+
+        [JsonProperty("numeric")]
+        public int Numeric { get; set; }
+
+        [JsonProperty("math")]
+        public bool Math { get; set; }
+
+        [JsonProperty("minLength")]
+        public int MinLength { get; set; }
+
+        [JsonProperty("maxLength")]
+        public int MaxLength { get; set; }
+    }
 }

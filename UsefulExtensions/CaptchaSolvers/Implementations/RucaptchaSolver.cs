@@ -5,6 +5,7 @@ using System.Threading;
 using System;
 using UsefulExtensions.CaptchaSolvers.Models;
 using System.Globalization;
+using System.Security.Cryptography.X509Certificates;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations
 {
@@ -34,6 +35,26 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             Key = key;
         }
 
+        public string SolveTextCaptcha(string base64image, bool phrase = false, bool regsense = false, bool math = false, Numeric numeric = Numeric.None, int minLength = 0, int maxLength = 0, string instruction = null)
+        {
+            string inUrl = $"{Url}/in.php?" +
+                           $"key={Key}" +
+                           $"&method=base64 " +
+                           $"&body={base64image}" +
+                           $"&phrase={BoolToInt(phrase)}" +
+                           $"&regsense={BoolToInt(regsense)}" +
+                           $"&numeric={(int)numeric}" +
+                           $"&calc={BoolToInt(math)}" +
+                           $"&min_len={minLength}" +
+                           $"&max_len={maxLength}" +
+                           $"&json=1";
+
+            if (instruction != null)
+                inUrl += $"&textinstructions={instruction}";
+
+            return GetAnswer(inUrl);
+        }
+
         public string SolveArkoseCaptcha(string publicKey, string surl, string pageUrl)
         {
             string inUrl = $"{Url}/in.php?" +
@@ -45,43 +66,6 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                            $"&json=1";
 
             return GetAnswer(inUrl);
-        }
-
-        private string GetAnswer(string inUrl)
-        {
-            using (HttpRequest request = new HttpRequest())
-            {
-                request.ReadWriteTimeout = request.KeepAliveTimeout
-                   = request.ConnectTimeout = (int)RequestTimeout.TotalMilliseconds;
-
-                if (Proxy != null)
-                    request.Proxy = Proxy;
-
-                string inResponseString = request.Get(inUrl).ToString();
-                RucaptchaResponse inResponse = JsonConvert.DeserializeObject<RucaptchaResponse>(inResponseString);
-
-                if (inResponse.Status != 1)
-                    throw new CaptchaSolvingException(inResponse.Status, this, $"Captcha error: {inResponse.Request}");
-
-                OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.Request}"));
-
-                RucaptchaResponse solveResponse = new RucaptchaResponse() { Status = 0, Request = CAPTCHA_NOT_READY };
-
-                while (solveResponse.Status == 0)
-                {
-                    Thread.Sleep(_delay);
-
-                    string solveResponseString = request.Get($"{Url}/res.php?key={Key}&action=get&json=1&id={inResponse.Request}").ToString();
-                    solveResponse = JsonConvert.DeserializeObject<RucaptchaResponse>(solveResponseString);
-
-                    if (solveResponse.Status == 0 && solveResponse.Request != CAPTCHA_NOT_READY)
-                        throw new CaptchaSolvingException(inResponse.Status, this, $"Captcha error: {inResponse.Request}");
-
-                    OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha result: {solveResponse.Request}"));
-                }
-
-                return solveResponse.Request;
-            }
         }
 
         public string SolveRecaptchaV2(string siteKey, string pageUrl, bool invisible)
@@ -218,6 +202,45 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                 inUrl += $"&api_server={apiServer}";
 
             return new GeeTestV4CaptchaResult() { CaptchaOutput = GetAnswer(inUrl) };
+        }
+
+        private int BoolToInt(bool value) => value ? 1 : 0;
+
+        private string GetAnswer(string inUrl)
+        {
+            using (HttpRequest request = new HttpRequest())
+            {
+                request.ReadWriteTimeout = request.KeepAliveTimeout
+                   = request.ConnectTimeout = (int)RequestTimeout.TotalMilliseconds;
+
+                if (Proxy != null)
+                    request.Proxy = Proxy;
+
+                string inResponseString = request.Get(inUrl).ToString();
+                RucaptchaResponse inResponse = JsonConvert.DeserializeObject<RucaptchaResponse>(inResponseString);
+
+                if (inResponse.Status != 1)
+                    throw new CaptchaSolvingException(inResponse.Status, this, $"Captcha error: {inResponse.Request}");
+
+                OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.Request}"));
+
+                RucaptchaResponse solveResponse = new RucaptchaResponse() { Status = 0, Request = CAPTCHA_NOT_READY };
+
+                while (solveResponse.Status == 0)
+                {
+                    Thread.Sleep(_delay);
+
+                    string solveResponseString = request.Get($"{Url}/res.php?key={Key}&action=get&json=1&id={inResponse.Request}").ToString();
+                    solveResponse = JsonConvert.DeserializeObject<RucaptchaResponse>(solveResponseString);
+
+                    if (solveResponse.Status == 0 && solveResponse.Request != CAPTCHA_NOT_READY)
+                        throw new CaptchaSolvingException(inResponse.Status, this, $"Captcha error: {inResponse.Request}");
+
+                    OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha result: {solveResponse.Request}"));
+                }
+
+                return solveResponse.Request;
+            }
         }
     }
 
