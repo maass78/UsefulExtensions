@@ -1,20 +1,20 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha
+namespace UsefulExtensions.CaptchaSolvers.Implementations.Models
 {
-    internal class AnticaptchaTask
+    public class CaptchaTask
     {
         [JsonProperty("type")]
         public string Type { get; }
 
-        public AnticaptchaTask(string type)
+        public CaptchaTask(string type)
         {
             Type = type;
         }
     }
 
-    internal class RecaptchaV2Task : AnticaptchaTask
+    internal class RecaptchaV2Task : CaptchaTask
     {
         public RecaptchaV2Task() : base("RecaptchaV2TaskProxyless") { }
 
@@ -26,9 +26,12 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha
 
         [JsonProperty("isInvisible")]
         public bool IsInvisible { get; set; }
+
+        [JsonProperty("recaptchaDataSValue")]
+        public string RecaptchaDataSValue { get; set; }
     }
 
-    internal class RecaptchaV2EnterpriseTask : AnticaptchaTask
+    internal class RecaptchaV2EnterpriseTask : CaptchaTask
     {
         public RecaptchaV2EnterpriseTask() : base("RecaptchaV2EnterpriseTaskProxyless") { }
 
@@ -40,9 +43,12 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha
 
         [JsonProperty("enterprisePayload")]
         public object EnterprisePayload { get; set; }
+
+        [JsonProperty("apiDomain")]
+        public string ApiDomain { get; set; }
     }
 
-    internal class RecaptchaV3Task : AnticaptchaTask
+    internal class RecaptchaV3Task : CaptchaTask
     {
         public RecaptchaV3Task() : base("RecaptchaV3TaskProxyless") { }
 
@@ -65,7 +71,24 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha
         public string ApiDomain { get; set; }
     }
 
-    internal class ArkoseCaptchaTask : AnticaptchaTask
+    internal class HCaptchaTask : CaptchaTask
+    {
+        public HCaptchaTask() : base("HCaptchaTaskProxyless") { }
+
+        [JsonProperty("websiteURL")]
+        public string WebsiteURL { get; set; }
+
+        [JsonProperty("websiteKey")]
+        public string WebsiteKey { get; set; }
+
+        [JsonProperty("isInvisible")]
+        public bool IsInvisible { get; set; }
+
+        [JsonProperty("enterprisePayload")]
+        public object EnterprisePayload { get; set; }
+    }
+
+    internal class ArkoseCaptchaTask : CaptchaTask
     {
         public ArkoseCaptchaTask() : base("FunCaptchaTaskProxyless") { }
 
@@ -82,18 +105,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha
         public string WebsitePublicKey { get; set; }
     }
     
-    internal class HCaptchaTask : AnticaptchaTask
-    {
-        public HCaptchaTask() : base("HCaptchaTaskProxyless") { }
-
-        [JsonProperty("websiteURL")]
-        public string WebsiteURL { get; set; }
-
-        [JsonProperty("websiteKey")]
-        public string WebsiteKey { get; set; }
-    }
-
-    internal class GeeTestTask : AnticaptchaTask
+    internal class GeeTestTask : CaptchaTask
     {
         public GeeTestTask() : base("GeeTestTaskProxyless") { }
 
@@ -112,17 +124,13 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha
         [JsonProperty("geetestApiServerSubdomain")]
         public string GeetestApiServerSubdomain { get; set; }
 
-        [JsonProperty("geetestGetLib")]
-        public string GeetestGetLib { get; set; }
-
         [JsonProperty("initParameters")]
         public object InitParameters { get; set; }
     }
-    
 
-    internal class CustomTask<T> : AnticaptchaTask
+    internal class CustomAnticaptchaTask<T> : CaptchaTask
     {
-        public CustomTask() : base("AntiGateTask") { }
+        public CustomAnticaptchaTask() : base("AntiGateTask") { }
 
         [JsonProperty("websiteURL")]
         public string WebsiteURL { get; set; }
@@ -149,7 +157,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha
         public List<string> DomainsOfInterest { get; set; }
     }
 
-    internal class TextTask : AnticaptchaTask
+    internal class TextTask : CaptchaTask
     {
         public TextTask() : base("ImageToTextTask") { }
 
@@ -173,5 +181,16 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha
 
         [JsonProperty("maxLength")]
         public int MaxLength { get; set; }
+    }
+
+    internal class YandexSmartCaptchaTask : CaptchaTask
+    {
+        public YandexSmartCaptchaTask() : base("YandexSmartCaptchaTaskProxyless") { }
+
+        [JsonProperty("websiteURL")]
+        public string WebsiteURL { get; set; }
+
+        [JsonProperty("websiteKey")]
+        public string WebsiteKey { get; set; }
     }
 }

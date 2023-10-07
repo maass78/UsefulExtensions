@@ -1,12 +1,22 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha
+namespace UsefulExtensions.CaptchaSolvers.Implementations.Models
 {
-    internal class RecaptchaV2Solution
+    internal class RecaptchaSolution
     {
         [JsonProperty("gRecaptchaResponse")]
         public string GRecaptchaResponse { get; set; }
+    }
+
+    internal class HCaptchaSolution : RecaptchaSolution
+    {
+        [JsonProperty("respKey")]
+        public string RespKey { get; set; }
+
+
+        [JsonProperty("userAgent")]
+        public string UserAgent { get; set; }
     }
 
     internal class TextSolution
@@ -52,6 +62,12 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Anticaptcha
 
         [JsonProperty("captcha_output")]
         public string CaptchaOutput { get; set; }
+    }
+
+    internal class YandexSmartCaptchaSolution
+    {
+        [JsonProperty("token")]
+        public string Token { get; set; }
     }
 
     public class CustomSolution

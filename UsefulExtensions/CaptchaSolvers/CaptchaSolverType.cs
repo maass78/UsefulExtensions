@@ -8,17 +8,13 @@ namespace UsefulExtensions.CaptchaSolvers
     public enum CaptchaSolverType
     {
         /// <summary>
-        /// https://rucaptcha.com/
+        /// <see href="https://rucaptcha.com/"/>
         /// </summary>
         Rucaptcha,
         /// <summary>
-        /// https://anti-captcha.com/
+        /// <see href="https://anti-captcha.com/"/>
         /// </summary>
         AntiCaptcha,
-        /// <summary>
-        /// https://capmonster.cloud/ru/
-        /// </summary>
-        CapMonsterCloud
     }
 
     /// <summary>
@@ -41,9 +37,6 @@ namespace UsefulExtensions.CaptchaSolvers
 
                 case CaptchaSolverType.AntiCaptcha:
                     return new AnticaptchaSolver(apiKey);
-
-                case CaptchaSolverType.CapMonsterCloud:
-                    return new CapmonsterCloudSolver(apiKey);
             }
 
             return null;

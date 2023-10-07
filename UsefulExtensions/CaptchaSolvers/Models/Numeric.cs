@@ -18,6 +18,11 @@
         /// <summary>
         /// Только буквы
         /// </summary>
-        OnlyLetters = 2
+        OnlyLetters = 2,
+
+        /// <summary>
+        /// И буквы, и цифры должны быть в капче
+        /// </summary>
+        NumbersAndLetters = 3
     }
 }
