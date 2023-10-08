@@ -230,7 +230,17 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
                     taskResult = JsonConvert.DeserializeObject<GetTaskResponse<T>>(request.Post($"{BaseUrl}/getTaskResult", new StringContent(getSolution)).ToString());
 
                     if (taskResult.ErrorId != 0)
+                    {
+                        if (typeof(T) == typeof(CustomSolution) && taskResult.ErrorId == 57)
+                            throw new CustomCaptchaSolvingException(taskResult.ErrorId, this, $"Captcha error: {taskResult.ErrorCode} ({taskResult.ErrorDescription}) ID: {taskResult.ErrorId}")
+                            {
+                                ErrorMessage = taskResult.ErrorDescription,
+                                ScreenshotUrl = taskResult.Screenshot
+                            };
+
                         throw new CaptchaSolvingException(taskResult.ErrorId, this, $"Captcha error: {taskResult.ErrorCode} ({taskResult.ErrorDescription}) ID: {taskResult.ErrorId}");
+                    }
+
 
                     OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha status: {taskResult.Status}"));
                 }

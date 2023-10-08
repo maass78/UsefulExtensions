@@ -90,6 +90,12 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Models
         [JsonProperty("domainsOfInterest")]
         public object DomainsOfInterest { get; set; }
 
+        [JsonProperty("screenshots")]
+        public List<string> Screenshots { get; set; }
+
+        [JsonProperty("HTMLsInBase64")]
+        public List<string> HTMLsInBase64 { get; set; }
+
         public class DomainOfInterest
         {
             [JsonProperty("cookies")]

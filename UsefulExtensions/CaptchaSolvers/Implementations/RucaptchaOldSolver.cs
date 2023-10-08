@@ -5,13 +5,14 @@ using System.Threading;
 using System;
 using UsefulExtensions.CaptchaSolvers.Models;
 using System.Globalization;
-using System.Security.Cryptography.X509Certificates;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations
 {
     /// <summary>
-    /// Реализация интерфейса <see cref="ICaptchaSolver"/> для сервиса RuCaptcha (https://rucaptcha.com/)
+    /// Реализация интерфейса <see cref="ICaptchaSolver"/> для сервиса RuCaptcha (https://rucaptcha.com/) API v1
     /// </summary>
+    [Obsolete("Данная реализация испольует recaptcha api v1 (не доступны все методы), " +
+        "и этот класс больше не наследуется от ICaptchaSolver. Используйте UsefulExtensions.CaptchaSolvers.Implementations.RucaptchaSolver", false)]
     public class RucaptchaOldSolver 
     {
         private const string CAPTCHA_NOT_READY = "CAPCHA_NOT_READY";

@@ -8,6 +8,10 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
     /// </summary>
     public class AnticaptchaSolver : ApiCaptchaSolver
     {
+        /// <summary>
+        /// Констурктор класса <see cref="AnticaptchaSolver"/>
+        /// </summary>
+        /// <param name="apiKey">API ключ для доступа к сервису</param>
         public AnticaptchaSolver(string apiKey) : base("https://api.anti-captcha.com", apiKey) { }
 
         /// <summary>
@@ -22,6 +26,8 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         /// <param name="proxyLogin">Логин, если требуется авторизация прокси (basic). Если не надо, указывайте <see langword="null"/>.</param>
         /// <param name="proxyPassword">Пароль прокси. Если не надо, указывайте <see langword="null"/>.</param>
         /// <param name="domainsOfInterest">Список доменных имен, где мы должны собрать cookies и значения localStorage. Его также можно задать статично при редактировании шаблона.</param>
+        /// <exception cref="Exceptions.CustomCaptchaSolvingException"/>
+        /// <exception cref="Exceptions.CaptchaSolvingException"/>
         /// <returns>Данные браузера работника (куки, локальное хранилище и т. д.)</returns>
         public CustomSolution SolveCustomCaptcha<T>(string websiteUrl, string templateName, T variables, 
             string proxyAddress = null, int? proxyPort = null, string proxyLogin = null, string proxyPassword = null, List<string> domainsOfInterest = null)

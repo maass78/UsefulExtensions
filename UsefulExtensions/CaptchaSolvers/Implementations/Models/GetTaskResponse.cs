@@ -33,5 +33,8 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Models
 
         [JsonProperty("solveCount")]
         public string SolveCount { get; set; }
+
+        [JsonProperty("screenshot")]
+        public string Screenshot { get; set; }
     }
 }

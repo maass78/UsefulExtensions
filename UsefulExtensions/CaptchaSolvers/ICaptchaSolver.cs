@@ -5,7 +5,8 @@ using UsefulExtensions.CaptchaSolvers.Models;
 namespace UsefulExtensions.CaptchaSolvers
 {
     /// <summary>
-    /// Интерфейс взаимодействия с сервисом решения капчи. Стандартные реализации: <see cref="UsefulExtensions.CaptchaSolvers.Implementations.RucaptchaOldSolver"/>, <see cref="UsefulExtensions.CaptchaSolvers.Implementations.AnticaptchaSolver"/>
+    /// Интерфейс взаимодействия с сервисом решения капчи. Стандартные реализации: <see cref="UsefulExtensions.CaptchaSolvers.Implementations.RucaptchaSolver"/>, 
+    /// <see cref="UsefulExtensions.CaptchaSolvers.Implementations.AnticaptchaSolver"/>
     /// </summary>
     public interface ICaptchaSolver
     {
@@ -21,6 +22,7 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <param name="maxLength">Максимальная длина. 0 - без ограничений</param>
         /// <param name="comment">Текстовая инструкция для работника</param>
         /// <param name="b64imgInstruction">Дополнительное изображение с инструкцией, которое будет показано работникам. Изображение должно быть закодировано в формат Base64.</param>
+        /// <exception cref="Exceptions.CaptchaSolvingException"/>
         /// <returns>Текст решенной капчи</returns>
         string SolveTextCaptcha(string base64image, bool phrase = false, bool regsense = false, bool math = false, 
             Numeric numeric = Numeric.None, int minLength = 0, int maxLength = 0, string comment = null, string b64imgInstruction = null);
@@ -32,6 +34,7 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <param name="pageUrl">Полный URL-адрес целевой веб-страницы, на которую загружается капча.</param>
         /// <param name="invisible"><see langword="true"/> — на сайте невидимая рекапча. <see langword="false"/> — обычная рекапча.</param>
         /// <param name="recaptchaDataSValue">Значение параметра data-s. Может потребоваться для обхода капчи в сервисах Google.</param>
+        /// <exception cref="Exceptions.CaptchaSolvingException"/>
         /// <returns>Токен g-recaptcha-response</returns>
         string SolveRecaptchaV2(string siteKey, string pageUrl, bool invisible, string recaptchaDataSValue = null);
 
@@ -42,9 +45,8 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <param name="pageUrl">Полный URL-адрес целевой веб-страницы, на которую загружается капча.</param>
         /// <param name="invisible"><see langword="true"/> — на сайте невидимая рекапча. <see langword="false"/> — обычная рекапча.</param>
         /// <param name="enterprisePayload">Дополнительные параметры, передаваемые вызову grecaptcha.enterprise.render. Например, может существовать объект, содержащий значение s.</param>
-        /// <param name="userAgent">User-Agent браузера, который будет использован пользователем при загрузке капчи. Важно использовать значения User-Agent только современных браузеров.</param>
-        /// <param name="cookies">Переданные вами cookie будут установлены в браузере нашего работника. Часто используется для решения капчи в сервисах Google. Формат: key1=val1; key2=val2</param>
         /// <param name="apiDomain">Домен, с которого загружается капча: recaptcha.net или google.com. По умолчанию используется google.com.</param>
+        /// <exception cref="Exceptions.CaptchaSolvingException"/>
         /// <returns>Токен g-recaptcha-response</returns>
         string SolveRecaptchaV2Enterprise(string siteKey, string pageUrl, object enterprisePayload = null, string apiDomain = null);
 
@@ -57,6 +59,7 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <param name="domain">Используйте этот параметр чтобы прислать доменное имя с которого мы должны загружать скрипты рекапчи. Может иметь только одно из этих двух значений: "www.google.com" или "www.recaptcha.net". Не используйте этот параметр, если не понимаете зачем он нужен.</param>
         /// <param name="isEnterprise">Установите этот флаг в "true" если вы хотите решить эту рекапчу как Enterprise. Значение по-умолчанию равно "false" и рекапча будет решена через обычное API. Может быть определено по вызову javascript: grecaptcha.enterprise.execute('site_key', {..})</param>
         /// <param name="minScore">Фильтрует работников с требуемым score. Значение может быть одним из: 0.3 0.7 0.9</param>
+        /// <exception cref="Exceptions.CaptchaSolvingException"/>
         /// <returns>Токен g-recaptcha-response</returns>
         string SolveRecaptchaV3(string siteKey, string pageUrl, double minScore = 0.3, string pageAction = null, bool isEnterprise = false, string domain = null);
 
@@ -68,7 +71,8 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <param name="pageUrl">Полный URL-адрес целевой веб-страницы, на которую загружается капча.</param>
         /// <param name="isInvisible">Используйте значение <see langword="true"/> для невидимой версии hcaptcha (в настоящее время встречается крайне редко)</param>
         /// <param name="enterprisePayload">Дополнительные данные для решения капчи - используется в очень редких случаях и только в сочетании с invisible=1. Cодержит дополнительные параметры, такие как: rqdata, sentry, apiEndpoint, endpoint, reportapi, assethost, imghost.</param>
-        /// <returns>Токен решенной капчи</returns>
+        /// <exception cref="Exceptions.CaptchaSolvingException"/>
+        /// <returns>Обьект данных решенной капчи</returns>
         HCaptchaResult SolveHCaptcha(string siteKey, string pageUrl, bool isInvisible = false, object enterprisePayload = null);
 
 
@@ -79,6 +83,7 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <param name="pageUrl">Полный URL-адрес целевой веб-страницы, на которую загружается капча.</param>
         /// <param name="funcaptchaApiJSSubdomain">Пользовательский поддомен, используемый для загрузки виджета captcha, например: sample-api.arkoselabs.com</param>
         /// <param name="data">Дополнительный объект полезной нагрузки данных преобразован в строку с помощью JSON.stringify. Пример: {\"blob\":\"BLOB_DATA_VALUE\"}</param>
+        /// <exception cref="Exceptions.CaptchaSolvingException"/>
         /// <returns>Токен решенной капчи</returns>
         string SolveArkoseCaptcha(string publicKey, string pageUrl, string funcaptchaApiJSSubdomain = null, string data = null);
 
@@ -90,6 +95,7 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <param name="challenge">Значение параметра challenge, найденное на сайте (Меняющийся ключ. Убедитесь что получаете каждый раз новый ключ для каждой капчи, иначе вы будете платить за каждую капчу с ошибкой)</param>
         /// <param name="pageUrl">Полный URL-адрес целевой веб-страницы, на которую загружается капча.</param>
         /// <param name="apiServer">Значение параметра api_server, найденное на сайте (Опциональный поддомен API. Может потребоваться для некоторых имплементаций)</param>
+        /// <exception cref="Exceptions.CaptchaSolvingException"/>
         /// <returns>Обьект данных решенной капчи</returns>
         GeeTestV3CaptchaResult SolveGeeTestV3Captcha(string gt, string challenge, string pageUrl, string apiServer = null);
 
@@ -100,6 +106,7 @@ namespace UsefulExtensions.CaptchaSolvers
         /// <param name="pageUrl">Полный URL-адрес целевой веб-страницы, на которую загружается капча.</param>
         /// <param name="apiServer">Значение параметра api_server, найденное на сайте (Опциональный поддомен API. Может потребоваться для некоторых имплементаций)</param>
         /// <param name="initParametets">Обязательно для GeeTest V4. Параметр, который передается в вызове функции initGeetest4, обязательно содержит значение captcha_id. Пример использования: {"captcha_id" : "e392e1d7fd421dc63325744d5a2b9c73"}</param>
+        /// <exception cref="Exceptions.CaptchaSolvingException"/>
         /// <returns>Обьект данных решенной капчи</returns>
         GeeTestV4CaptchaResult SolveGeeTestV4Captcha(string gt, string pageUrl, object initParametets, string apiServer = null);
 

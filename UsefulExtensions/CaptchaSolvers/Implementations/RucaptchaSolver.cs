@@ -7,6 +7,10 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
     /// </summary>
     public class RucaptchaSolver : ApiCaptchaSolver
     {
+        /// <summary>
+        /// Констурктор класса <see cref="RucaptchaSolver"/>
+        /// </summary>
+        /// <param name="apiKey">API ключ для доступа к сервису</param>
         public RucaptchaSolver(string apiKey) : base("https://api.rucaptcha.com", apiKey) { }
 
         /// <summary>
