@@ -70,6 +70,33 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Models
         public string Token { get; set; }
     }
 
+    internal class GridSolution
+    {
+        [JsonProperty("click")]
+        public List<int> Click { get; set; }
+    }
+
+    internal class ClickSolution
+    {
+        [JsonProperty("coordinates")]
+        public List<Coordinate> Coordinates { get; set; }
+    }
+
+    public class Coordinate
+    {
+        [JsonProperty("x")]
+        public int X { get; set; }
+
+        [JsonProperty("y")]
+        public int Y { get; set; }
+    }
+
+    internal class ImageToCoordinatesSolution
+    {
+        [JsonProperty("coordinates")]
+        public List<List<int>> Coordinates { get; set; }
+    }
+
     public class CustomSolution
     {
         [JsonProperty("cookies")]

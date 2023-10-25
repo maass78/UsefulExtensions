@@ -183,6 +183,64 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Models
         public int MaxLength { get; set; }
     }
 
+    internal class GridTask : CaptchaTask
+    {
+        public GridTask() : base("GridTask") { }
+
+        [JsonProperty("body")]
+        public string Body { get; set; }
+
+        [JsonProperty("comment")]
+        public string Comment { get; set; }
+
+        [JsonProperty("imgInstructions")]
+        public string ImgInstructions { get; set; }
+
+        [JsonProperty("rows")]
+        public int Rows { get; set; }
+
+        [JsonProperty("columns")]
+        public int Columns { get; set; }
+    }
+
+    internal class BoundingBoxTask : CaptchaTask
+    {
+        public BoundingBoxTask() : base("BoundingBoxTask") { }
+
+        [JsonProperty("body")]
+        public string Body { get; set; }
+
+        [JsonProperty("comment")]
+        public string Comment { get; set; }
+
+        [JsonProperty("imgInstructions")]
+        public string ImgInstructions { get; set; }
+    }
+
+    internal class ImageToCoordinatesTask : CaptchaTask
+    {
+        public ImageToCoordinatesTask() : base("ImageToCoordinatesTask") { }
+
+
+        [JsonProperty("body")]
+        public string Body { get; set; }
+
+        [JsonProperty("comment")]
+        public string Comment { get; set; }
+
+        [JsonProperty("mode")]
+        public string Mode { get; set; }
+
+        [JsonProperty("websiteURL")]
+        public string WebsiteURL { get; set; }
+    }
+
+    public enum ImageToCoordinatesMode
+    {
+        Points,
+        Rectangle
+    }
+
     internal class YandexSmartCaptchaTask : CaptchaTask
     {
         public YandexSmartCaptchaTask() : base("YandexSmartCaptchaTaskProxyless") { }

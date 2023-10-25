@@ -12,7 +12,7 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         /// Констурктор класса <see cref="AnticaptchaSolver"/>
         /// </summary>
         /// <param name="apiKey">API ключ для доступа к сервису</param>
-        public AnticaptchaSolver(string apiKey) : base("https://api.anti-captcha.com", apiKey) { }
+        public AnticaptchaSolver(string apiKey) : base("http://api.anti-captcha.com", apiKey) { }
 
         /// <summary>
         /// Решает кастомную AntiGate задачу
@@ -45,6 +45,32 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
             };
 
             return GetTaskResult<CustomSolution, CustomAnticaptchaTask<T>>(task);
+        }
+
+        /// <summary>
+        /// Пришлите тело изображения, комментарий на английском языке и получите до 6-ти наборов координат нужных объектов. Вы можете запросить координаты точек, а также координаты прямоугольников, в которых находится объект.
+        /// </summary>
+        /// <remarks>
+        /// Максимальный размер изображения по любой из сторон - 500 пикселей. Изображения превышающие данный лимит будут ужаты до 500 пикселей в интерфейсе работника.
+        /// </remarks>
+        /// <param name="b64body">Тело капчи закодированное в base64. Убедитесь что присылаете его без знаков переноса строки. Не включайте префиксы 'data:image/png,' или аналоги, только чистый base64!</param>
+        /// <param name="comment">Комментарий, только на английском языке. Пример: "Select objects in specified order" или "select all cars".</param>
+        /// <param name="mode">Режим задачи, может быть <see cref="ImageToCoordinatesMode.Points"/> или <see cref="ImageToCoordinatesMode.Rectangle"/>. По умолчанию - <see cref="ImageToCoordinatesMode.Points"/>.</param>
+        /// <param name="websiteURL">Опциональный параметр, чтобы позже различать источники картинок в статистике трат.</param>
+        /// <returns>Массив наборов координат. Для режима <see cref="ImageToCoordinatesMode.Points"/> это набор (x, y). Для <see cref="ImageToCoordinatesMode.Rectangle"/> это (x1, y1, x2, y2), начиная с угла сверху-налево во вниз-направо. Начало координат находится левом верхнем углу.</returns>
+        /// <exception cref="Exceptions.CaptchaSolvingException"/>
+        public List<List<int>> SolveImageToCoordinatesCaptcha(string b64body, string comment, ImageToCoordinatesMode mode = ImageToCoordinatesMode.Points,
+            string websiteURL = null)
+        {
+            var task = new ImageToCoordinatesTask()
+            {
+                Body = b64body,
+                Comment = comment,
+                Mode = mode.ToString().ToLower(),
+                WebsiteURL = websiteURL
+            };
+
+            return GetTaskResult<ImageToCoordinatesSolution, ImageToCoordinatesTask>(task).Coordinates;
         }
     }
 }

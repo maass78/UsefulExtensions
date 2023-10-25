@@ -8,6 +8,6 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations.Models
         public string ClientKey { get; set; }
 
         [JsonProperty("taskId")]
-        public int TaskId { get; set; }
+        public long TaskId { get; set; }
     }
 }

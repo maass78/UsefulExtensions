@@ -9,7 +9,7 @@ using System.Globalization;
 namespace UsefulExtensions.CaptchaSolvers.Implementations
 {
     /// <summary>
-    /// Реализация интерфейса <see cref="ICaptchaSolver"/> для сервиса RuCaptcha (https://rucaptcha.com/) API v1
+    /// Реализация интерфейса <see cref="ICaptchaSolver"/> для сервиса RuCaptcha (<see href="https://rucaptcha.com/"/>) API v1
     /// </summary>
     [Obsolete("Данная реализация испольует recaptcha api v1 (не доступны все методы), " +
         "и этот класс больше не наследуется от ICaptchaSolver. Используйте UsefulExtensions.CaptchaSolvers.Implementations.RucaptchaSolver", false)]
