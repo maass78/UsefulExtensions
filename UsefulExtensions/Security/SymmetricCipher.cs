@@ -76,7 +76,18 @@ namespace UsefulExtensions.Security
                         using (CryptoStream reader = new CryptoStream(from, decryptor, CryptoStreamMode.Read))
                         {
                             decrypted = new byte[value.Length];
-                            reader.Read(decrypted, 0, decrypted.Length);
+
+                            int totalRead = 0;
+
+                            while (totalRead < decrypted.Length)
+                            {
+                                int bytesRead = reader.Read(decrypted, 0, decrypted.Length);
+
+                                if (bytesRead == 0)
+                                    break;
+
+                                totalRead += bytesRead;
+                            }
                         }
                     }
                 }
