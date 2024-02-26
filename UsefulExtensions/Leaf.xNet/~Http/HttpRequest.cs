@@ -298,6 +298,11 @@ namespace Leaf.xNet
         /// </summary>
         public bool UseAdvancedTlsClient { get; set; } = false;
 
+        /// <summary>
+        /// Настройки Tls. Используются только тогда, когда <see cref="UseAdvancedTlsClient"/> равно <see langword="true"/>
+        /// </summary>
+        public TlsSettings TlsSettings { get; set; } = new TlsSettings();
+
         #region Поведение
 
         /// <summary>
@@ -3506,10 +3511,8 @@ namespace Leaf.xNet
                     {
                         var protocol = new TlsClientProtocol(ClientNetworkStream);
 
-                        protocol.Connect(new AdvancedTlsClient
-                        {
-                            ServerNames = new[] { address.Host }
-                        });
+                        protocol.Connect(TlsSettings.GetTlsClient(new[] { address.Host }));
+
                         _tlsClientProtocol = protocol;
 
                         ClientStream = protocol.Stream;

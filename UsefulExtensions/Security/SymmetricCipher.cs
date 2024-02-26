@@ -81,7 +81,7 @@ namespace UsefulExtensions.Security
 
                             while (totalRead < decrypted.Length)
                             {
-                                int bytesRead = reader.Read(decrypted, 0, decrypted.Length);
+                                int bytesRead = reader.Read(decrypted, totalRead, decrypted.Length - totalRead);
 
                                 if (bytesRead == 0)
                                     break;
