@@ -71,7 +71,7 @@ namespace Leaf.xNet
         /// Создать tls клиент с данными настройками
         /// </summary>
         /// <returns></returns>
-        public AdvancedTlsClient GetTlsClient(string[] serverNames)
+        public virtual AdvancedTlsClient GetTlsClient(string[] serverNames)
         {
             return new AdvancedTlsClient()
             {
@@ -83,7 +83,7 @@ namespace Leaf.xNet
             };
         }
 
-        private static SignatureAndHashAlgorithm CreateSignatureAlgorithm(int signatureScheme)
+        protected static SignatureAndHashAlgorithm CreateSignatureAlgorithm(int signatureScheme)
         {
             short hashAlgorithm = SignatureScheme.GetHashAlgorithm(signatureScheme);
             short signatureAlgorithm = SignatureScheme.GetSignatureAlgorithm(signatureScheme);
