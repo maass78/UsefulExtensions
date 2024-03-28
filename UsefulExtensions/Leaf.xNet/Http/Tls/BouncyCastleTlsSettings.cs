@@ -1,16 +1,20 @@
 ﻿using Org.BouncyCastle.Tls;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Leaf.xNet
 {
 
     /// <summary>
-    /// Настройки tls для <see cref="AdvancedTlsClient"/>
+    /// Обычные настройки TLS с помощью библиотеки BouncyCastle и её реализации TLS
     /// </summary>
-    public class TlsSettings
+    public class BouncyCastleTlsSettings : ITlsSettings
     {
-        public TlsSettings()
+        /// <summary>
+        /// Констуктор
+        /// </summary>
+        public BouncyCastleTlsSettings()
         {
             SignatureSchemes = new List<int>()
             {
@@ -58,22 +62,35 @@ namespace Leaf.xNet
             SupportedVersions = ProtocolVersion.TLSv13.DownTo(ProtocolVersion.TLSv10);
         }
 
+        /// <summary>
+        /// SignatureSchemes, в душе не ебу че это, но копировать надо
+        /// </summary>
         public List<int> SignatureSchemes { get; set; }
 
+        /// <summary>
+        /// Список шифронаборов
+        /// </summary>
         public List<int> SupportedCiphers { get; set; }
 
+        /// <summary>
+        /// Список Supported Groups, они же - elliptic_curves
+        /// </summary>
         public List<int> SupportedGroups { get; set; }
 
+        /// <summary>
+        /// Поддерживаемые версии TLS
+        /// </summary>
         public ProtocolVersion[] SupportedVersions { get; set; }
 
+        protected TlsClientProtocol protocol;
 
         /// <summary>
         /// Создать tls клиент с данными настройками
         /// </summary>
         /// <returns></returns>
-        public virtual AdvancedTlsClient GetTlsClient(string[] serverNames)
+        public virtual AbstractTlsClient GetTlsClient(string[] serverNames)
         {
-            return new AdvancedTlsClient()
+            return new BouncyCastleTlsClient()
             {
                 SignatureAlgorithms = SignatureSchemes.Select(x => CreateSignatureAlgorithm(x)).ToArray(),
                 SupportedCiphers = SupportedCiphers.ToArray(),
@@ -83,11 +100,42 @@ namespace Leaf.xNet
             };
         }
 
+        /// <summary>
+        /// Создать TLS протокол для использования 
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        public virtual TlsClientProtocol GetTlsProtocol(Stream stream)
+        {
+            return new TlsClientProtocol(stream);
+        }
+
         protected static SignatureAndHashAlgorithm CreateSignatureAlgorithm(int signatureScheme)
         {
             short hashAlgorithm = SignatureScheme.GetHashAlgorithm(signatureScheme);
             short signatureAlgorithm = SignatureScheme.GetSignatureAlgorithm(signatureScheme);
             return new SignatureAndHashAlgorithm(hashAlgorithm, signatureAlgorithm);
+        }
+        /// <inheritdoc/>
+        public virtual Stream GetTlsStream(string addressHost, Stream networkStream)
+        {
+            var protocol = GetTlsProtocol(networkStream);
+
+            protocol.Connect(GetTlsClient(new string[] { addressHost }));
+
+            this.protocol = protocol;
+
+            return protocol.Stream;
+        }
+
+        public void Dispose()
+        {
+            if (protocol != null)
+            {
+                protocol.Stream?.Dispose();
+                protocol.Close();
+                protocol = null;
+            }
         }
     }
 }

@@ -253,19 +253,6 @@ namespace Leaf.xNet
         /// <value>Значение по умолчанию — <see langword="null"/>.</value>
         public ProxyClient Proxy { get; set; }
 
-
-        /// <summary>
-        /// Возвращает или задает возможные протоколы SSL.
-        /// По умолчанию используется: <value>SslProtocols.Tls | SslProtocols.Tls12 | SslProtocols.Tls11</value>.
-        /// </summary>
-        public SslProtocols SslProtocols { get; set; } = SslProtocols.Tls | SslProtocols.Tls12 | SslProtocols.Tls11;
-
-        /// <summary>
-        /// Возвращает или задает метод делегата, вызываемый при проверки сертификата SSL, используемый для проверки подлинности.
-        /// </summary>
-        /// <value>Значение по умолчанию — <see langword="null"/>. Если установлено значение по умолчанию, то используется метод, который принимает все сертификаты SSL.</value>
-        public RemoteCertificateValidationCallback SslCertificateValidatorCallback { get; set; }
-
         /// <summary>
         /// Разрешает устанавливать пустые значения заголовкам.
         /// </summary>
@@ -292,16 +279,10 @@ namespace Leaf.xNet
         /// </summary>
         public bool IgnoreInvalidCookie { get; set; } = false;
 
-
         /// <summary>
-        /// Использовать <see cref="AdvancedTlsClient"/> для https соединения
+        /// Настройки Tls. Значение по умолчанию - новый экземляр класса <see cref="SystemTlsSettings"/>
         /// </summary>
-        public bool UseAdvancedTlsClient { get; set; } = false;
-
-        /// <summary>
-        /// Настройки Tls. Используются только тогда, когда <see cref="UseAdvancedTlsClient"/> равно <see langword="true"/>
-        /// </summary>
-        public TlsSettings TlsSettings { get; set; } = new TlsSettings();
+        public ITlsSettings TlsSettings { get; set; } = new SystemTlsSettings();
 
         #region Поведение
 
@@ -3041,14 +3022,11 @@ namespace Leaf.xNet
             if (!disposing || TcpClient == null)
                 return;
 
-            _tlsClientProtocol?.Stream?.Dispose();
-            //_tlsClientProtocol?.CloseInput();
-            _tlsClientProtocol?.Close();
-            _tlsClientProtocol = null;
-
+            TlsSettings.Dispose();
+            TlsSettings = null;
+            
             TcpClient.Close();
             TcpClient = null;
-
 
             ClientStream?.Dispose();
             ClientStream = null;
@@ -3507,26 +3485,7 @@ namespace Leaf.xNet
             {
                 try
                 {
-                    if (UseAdvancedTlsClient)
-                    {
-                        var protocol = new TlsClientProtocol(ClientNetworkStream);
-
-                        protocol.Connect(TlsSettings.GetTlsClient(new[] { address.Host }));
-
-                        _tlsClientProtocol = protocol;
-
-                        ClientStream = protocol.Stream;
-                    }
-                    else
-                    {
-                        var sslStream = SslCertificateValidatorCallback == null
-                            ? new SslStream(ClientNetworkStream, false, Http.AcceptAllCertificationsCallback)
-                            : new SslStream(ClientNetworkStream, false, SslCertificateValidatorCallback);
-
-                        sslStream.AuthenticateAsClient(address.Host, new X509CertificateCollection(), SslProtocols, false);
-
-                        ClientStream = sslStream;
-                    }
+                    ClientStream = TlsSettings.GetTlsStream(address.Host, ClientNetworkStream);
                 }
                 catch (Exception ex)
                 {

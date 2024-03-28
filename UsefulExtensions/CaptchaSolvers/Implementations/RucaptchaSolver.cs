@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Org.BouncyCastle.Utilities.Encoders;
+using System.Collections.Generic;
 using UsefulExtensions.CaptchaSolvers.Implementations.Models;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations
@@ -13,6 +14,12 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         /// </summary>
         /// <param name="apiKey">API ключ для доступа к сервису</param>
         public RucaptchaSolver(string apiKey) : base("https://api.rucaptcha.com", apiKey) { }
+        /// <summary>
+        /// Констурктор класса <see cref="RucaptchaSolver"/>
+        /// </summary>
+        /// <param name="apiKey">API ключ для доступа к сервису</param>
+        /// <param name="baseUrl">URL сервера, например <code>https://api.rucaptcha.com</code></param>
+        public RucaptchaSolver(string apiKey, string baseUrl) : base(baseUrl, apiKey) { }
 
         /// <summary>
         /// Решение Yandex Smart Captcha

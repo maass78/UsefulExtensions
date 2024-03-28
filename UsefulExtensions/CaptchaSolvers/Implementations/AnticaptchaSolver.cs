@@ -13,6 +13,12 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         /// </summary>
         /// <param name="apiKey">API ключ для доступа к сервису</param>
         public AnticaptchaSolver(string apiKey) : base("http://api.anti-captcha.com", apiKey) { }
+        /// <summary>
+        /// Констурктор класса <see cref="AnticaptchaSolver"/>
+        /// </summary>
+        /// <param name="apiKey">API ключ для доступа к сервису</param>
+        /// <param name="baseUrl">URL сервера, например <code>https://api.rucaptcha.com</code></param>
+        public AnticaptchaSolver(string apiKey, string baseUrl) : base(baseUrl, apiKey) { }
 
         /// <summary>
         /// Решает кастомную AntiGate задачу
