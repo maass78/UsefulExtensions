@@ -197,7 +197,6 @@ namespace Leaf.xNet
         private bool _tempAllowAutoRedirect;
         private bool _tempIgnoreProtocolErrors;
 
-        private TlsClientProtocol _tlsClientProtocol;
 
         #endregion
 
@@ -3023,7 +3022,6 @@ namespace Leaf.xNet
                 return;
 
             TlsSettings.Dispose();
-            TlsSettings = null;
             
             TcpClient.Close();
             TcpClient = null;

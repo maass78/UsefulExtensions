@@ -21,7 +21,7 @@ namespace Leaf.xNet
         /// Возвращает или задает возможные протоколы SSL.
         /// По умолчанию используется: <value>SslProtocols.Tls | SslProtocols.Tls12 | SslProtocols.Tls11</value>.
         /// </summary>
-        public SslProtocols SslProtocols { get; set; } 
+        public SslProtocols SslProtocols { get; set; } = SslProtocols.Tls | SslProtocols.Tls12 | SslProtocols.Tls11;
 
         /// <inheritdoc/>
         public Stream GetTlsStream(string addressHost, Stream networkStream)
