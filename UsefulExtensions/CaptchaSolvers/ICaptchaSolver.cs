@@ -1,5 +1,6 @@
 ﻿using Leaf.xNet;
 using System;
+using System.Net;
 using UsefulExtensions.CaptchaSolvers.Models;
 
 namespace UsefulExtensions.CaptchaSolvers
@@ -111,9 +112,15 @@ namespace UsefulExtensions.CaptchaSolvers
         GeeTestV4CaptchaResult SolveGeeTestV4Captcha(string gt, string pageUrl, object initParametets, string apiServer = null);
 
         /// <summary>
+        /// Прокси (устаревший, оставлен для совместимости)
+        /// </summary>
+        [Obsolete]
+        ProxyClient Proxy { get; set; }
+
+        /// <summary>
         /// Прокси
         /// </summary>
-        ProxyClient Proxy { get; set; }
+        IWebProxy WebProxy { get; set; }
 
         /// <summary>
         /// Вызывается, когда капча отправляется/решается

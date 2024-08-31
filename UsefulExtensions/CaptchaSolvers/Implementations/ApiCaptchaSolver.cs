@@ -1,10 +1,13 @@
-﻿using Leaf.xNet;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using UsefulExtensions.CaptchaSolvers.Exceptions;
 using UsefulExtensions.CaptchaSolvers.Implementations.Models;
 using UsefulExtensions.CaptchaSolvers.Models;
+using StringContent = System.Net.Http.StringContent;
 
 namespace UsefulExtensions.CaptchaSolvers.Implementations
 {
@@ -37,7 +40,10 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         public string BaseUrl { get; }
 
         /// <inheritdoc/>
-        public ProxyClient Proxy { get; set; }
+        public Leaf.xNet.ProxyClient Proxy { get => null; set { } }
+
+        /// <inheritdoc/>
+        public IWebProxy WebProxy { get; set; }
 
         /// <inheritdoc/>
         public event OnLogMessageHandler OnLogMessage;
@@ -193,59 +199,60 @@ namespace UsefulExtensions.CaptchaSolvers.Implementations
         /// <exception cref="CaptchaSolvingException">Ошибка при решении капчи (не хватает баланса, капча нерешаема, неверные параметры и т. д.)</exception>
         protected T GetTaskResult<T, Y>(Y task) where Y : CaptchaTask
         {
-            using (HttpRequest request = new HttpRequest())
+            using (var handler = new HttpClientHandler())
             {
-                request.ReadWriteTimeout = request.KeepAliveTimeout
-                    = request.ConnectTimeout = (int)RequestTimeout.TotalMilliseconds;
-
-                if (Proxy != null)
-                    request.Proxy = Proxy;
-
-                request.AddHeader("Content-Type", "application/json");
-
-                var createTaskRequest = new СreateTaskRequest<Y>()
+                using (var request = new HttpClient())
                 {
-                    ClientKey = Key,
-                    Task = task
-                };
+                    request.Timeout = RequestTimeout;
 
-                var inResponse = JsonConvert.DeserializeObject<CreateTaskResponse>(
-                    request.Post($"{BaseUrl}/createTask",
-                    new StringContent(JsonConvert.SerializeObject(createTaskRequest, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore }))).ToString());
+                    if (WebProxy != null)
+                        handler.Proxy = WebProxy;
 
-                if (inResponse.ErrorId != 0)
-                    throw new CaptchaSolvingException(inResponse.ErrorId, this, $"Captcha error: {inResponse.ErrorCode} ({inResponse.ErrorDescription}) ID: {inResponse.ErrorId}");
-
-                OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.TaskId}"));
-
-                var taskResult = new GetTaskResponse<T>();
-                while (taskResult.Status != CAPTCHA_READY)
-                {
-                    Thread.Sleep(_delay);
-
-                    request.AddHeader("Content-Type", "application/json");
-
-                    string getSolution = JsonConvert.SerializeObject(new GetTaskRequest() { ClientKey = Key, TaskId = inResponse.TaskId });
-
-                    taskResult = JsonConvert.DeserializeObject<GetTaskResponse<T>>(request.Post($"{BaseUrl}/getTaskResult", new StringContent(getSolution)).ToString());
-
-                    if (taskResult.ErrorId != 0)
+                    var createTaskRequest = new СreateTaskRequest<Y>()
                     {
-                        if (typeof(T) == typeof(CustomSolution) && taskResult.ErrorId == 57)
-                            throw new CustomCaptchaSolvingException(taskResult.ErrorId, this, $"Captcha error: {taskResult.ErrorCode} ({taskResult.ErrorDescription}) ID: {taskResult.ErrorId}")
-                            {
-                                ErrorMessage = taskResult.ErrorDescription,
-                                ScreenshotUrl = taskResult.Screenshot
-                            };
+                        ClientKey = Key,
+                        Task = task
+                    };
 
-                        throw new CaptchaSolvingException(taskResult.ErrorId, this, $"Captcha error: {taskResult.ErrorCode} ({taskResult.ErrorDescription}) ID: {taskResult.ErrorId}");
+                    var body = new StringContent(JsonConvert.SerializeObject(createTaskRequest, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore }));
+
+                    body.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                    var inResponse = JsonConvert.DeserializeObject<CreateTaskResponse>(
+                        request.PostAsync($"{BaseUrl}/createTask", body).Result.Content.ReadAsStringAsync().Result);
+
+                    if (inResponse.ErrorId != 0)
+                        throw new CaptchaSolvingException(inResponse.ErrorId, this, $"Captcha error: {inResponse.ErrorCode} ({inResponse.ErrorDescription}) ID: {inResponse.ErrorId}");
+
+                    OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha sended | ID = {inResponse.TaskId}"));
+
+                    var taskResult = new GetTaskResponse<T>();
+                    while (taskResult.Status != CAPTCHA_READY)
+                    {
+                        Thread.Sleep(_delay);
+
+                        body = new StringContent(JsonConvert.SerializeObject(new GetTaskRequest() { ClientKey = Key, TaskId = inResponse.TaskId }));
+                        body.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                        taskResult = JsonConvert.DeserializeObject<GetTaskResponse<T>>(request.PostAsync($"{BaseUrl}/getTaskResult", body).Result.Content.ReadAsStringAsync().Result);
+
+                        if (taskResult.ErrorId != 0)
+                        {
+                            if (typeof(T) == typeof(CustomSolution) && taskResult.ErrorId == 57)
+                                throw new CustomCaptchaSolvingException(taskResult.ErrorId, this, $"Captcha error: {taskResult.ErrorCode} ({taskResult.ErrorDescription}) ID: {taskResult.ErrorId}")
+                                {
+                                    ErrorMessage = taskResult.ErrorDescription,
+                                    ScreenshotUrl = taskResult.Screenshot
+                                };
+
+                            throw new CaptchaSolvingException(taskResult.ErrorId, this, $"Captcha error: {taskResult.ErrorCode} ({taskResult.ErrorDescription}) ID: {taskResult.ErrorId}");
+                        }
+
+                        OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha status: {taskResult.Status}"));
                     }
 
-
-                    OnLogMessage?.Invoke(this, new OnLogMessageEventArgs($"Captcha status: {taskResult.Status}"));
+                    return taskResult.Solution;
                 }
-
-                return taskResult.Solution;
             }
         }
     }

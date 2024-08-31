@@ -28,7 +28,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Neq.BouncyCastle.Portable" Version="2.0.219-beta" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
@@ -43,6 +42,12 @@
       <PackagePath>\</PackagePath>
     </None>
 	  
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BouncyCastle.Crypto">
+      <HintPath>..\..\bc-csharp\crypto\src\bin\Release\netstandard2.0\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

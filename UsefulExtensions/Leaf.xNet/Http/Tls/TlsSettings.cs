@@ -45,13 +45,20 @@ namespace Leaf.xNet
         /// <br/> <see cref="BouncyCastleTlsSettings"/>
         /// </summary>
         /// <param name="ja3">Строка типа JA3, состоит из пяти групп, разделенных запятой, которые состоят из десятичных цифр, разделенных знаком -, обозначающие параметры Client Hello, отправляемого клиентов. Порядок групп в JA3: <code>TLSVersion,Ciphers,Extensions,EllipticCurves,EllipticCurvePointFormats</code> Пример строки: <code>771,49196-49162-49195-52393-49161-49200-49172-49199-52392-49171-159-57-56-107-158-52394-51-50-103-22-19-157-53-61-156-47-60-10,0-23-65281-10-11-13-28,29-23-24-25,0</code></param>
-        public static ITlsSettings Ja3Tls(string ja3) => new Ja3TlsSettings(ja3);
+        public static ITlsSettings Ja3Tls(string ja3) => new Ja3TlsSettings(ja3, ProtocolVersion.TLSv12);
         /// <summary>
         /// Возращает реализацию SSL/TLS c помощью BouncyCastle, эмулирует отпечаток JA3
         /// <br/> <see cref="BouncyCastleTlsSettings"/>
         /// </summary>
         ///<param name="ja3">Строка типа JA3, состоит из пяти групп, разделенных запятой, которые состоят из десятичных цифр, разделенных знаком -, обозначающие параметры Client Hello, отправляемого клиентов. Порядок групп в JA3: <code>TLSVersion,Ciphers,Extensions,EllipticCurves,EllipticCurvePointFormats</code> Пример строки: <code>771,49196-49162-49195-52393-49161-49200-49172-49199-52392-49171-159-57-56-107-158-52394-51-50-103-22-19-157-53-61-156-47-60-10,0-23-65281-10-11-13-28,29-23-24-25,0</code></param>
-        public static ITlsSettings Ja3Tls(string ja3, ProtocolVersion[] versions) => new Ja3TlsSettings(ja3) { SupportedVersions = versions };
+        public static ITlsSettings Ja3Tls(string ja3, ProtocolVersion[] versions) => new Ja3TlsSettings(ja3, ProtocolVersion.TLSv12) { SupportedVersions = versions };
+
+        /// <summary>
+        /// Возращает реализацию SSL/TLS c помощью BouncyCastle, эмулирует отпечаток JA3
+        /// <br/> <see cref="BouncyCastleTlsSettings"/>
+        /// </summary>
+        ///<param name="ja3">Строка типа JA3, состоит из пяти групп, разделенных запятой, которые состоят из десятичных цифр, разделенных знаком -, обозначающие параметры Client Hello, отправляемого клиентов. Порядок групп в JA3: <code>TLSVersion,Ciphers,Extensions,EllipticCurves,EllipticCurvePointFormats</code> Пример строки: <code>771,49196-49162-49195-52393-49161-49200-49172-49199-52392-49171-159-57-56-107-158-52394-51-50-103-22-19-157-53-61-156-47-60-10,0-23-65281-10-11-13-28,29-23-24-25,0</code></param>
+        public static ITlsSettings Ja3Tls(string ja3, ProtocolVersion[] versions, ProtocolVersion recordVersion) => new Ja3TlsSettings(ja3, recordVersion) { SupportedVersions = versions };
         /// <summary>
         /// Возращает реализацию SSL/TLS c помощью BouncyCastle, эмулирует отпечаток JA3 от Firefox на 28.03.2024<br/><br/>Внимание: может устареть. Получить новый можно <a href="https://tls.browserleaks.com/tls">здесь</a>  
         /// </summary>
