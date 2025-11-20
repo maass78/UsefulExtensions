@@ -8,13 +8,13 @@
     <Description>Библиотека, позволяющая очень просто выполнять действия, часто необходимые в создании чекеров/регеров и прочего софта для автоматизации каких-либо процессов на сайтах.</Description>
     <PackageIcon>UsefulExtensions1024x1024 transparent.png</PackageIcon>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
-    <AssemblyVersion>1.2.5.0</AssemblyVersion>
-    <FileVersion>1.2.5.0</FileVersion>
+    <AssemblyVersion>1.2.6.0</AssemblyVersion>
+    <FileVersion>1.2.6.0</FileVersion>
     <PackageId>maass78.UsefulExtensions</PackageId>
     <RepositoryUrl>https://github.com/maass78/UsefulExtensions</RepositoryUrl>
     <PackageProjectUrl>https://github.com/maass78/UsefulExtensions</PackageProjectUrl>
     <NeutralLanguage>ru</NeutralLanguage>
-    <Version>1.2.5</Version>
+    <Version>1.2.6</Version>
     <DebugType>portable</DebugType>
 	<PackageTags>usefulextensions;captcha;rucaptcha;anticaptcha;maass78;sms;helper</PackageTags>
   </PropertyGroup>
